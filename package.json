@@ -1,0 +1,23 @@
+{
+  "name": "harker-bell-server",
+  "version": "1.0.0",
+  "description": "Server exposing public API and push notifications for Harker Bell Schedule.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BowenYin/harker-bell-server.git"
+  },
+  "author": "Bowen Yin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/BowenYin/harker-bell-server/issues"
+  },
+  "homepage": "https://github.com/BowenYin/harker-bell-server#readme",
+  "dependencies": {
+    "express": "^4.16.4",
+    "socket.io": "^2.2.0"
+  }
+}
