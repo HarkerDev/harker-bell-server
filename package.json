@@ -4,7 +4,8 @@
   "description": "Server exposing public API and push notifications for Harker Bell Schedule.",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js",
+    "dev": "nodemon index.js",
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\""
   },
   "repository": {

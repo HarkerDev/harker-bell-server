@@ -45,11 +45,11 @@ variables:
   # KUBE_INGRESS_BASE_DOMAIN is the application deployment domain and should be set as a variable at the group or project level.
   # KUBE_INGRESS_BASE_DOMAIN: domain.example.com
 
-  # POSTGRES_USER: user
-  # POSTGRES_PASSWORD: testing-password
+  POSTGRES_USER: user
+  POSTGRES_PASSWORD: testing-password
   POSTGRES_ENABLED: "false"
-  # POSTGRES_DB: $CI_ENVIRONMENT_SLUG
-  # POSTGRES_VERSION: 9.6.2
+  POSTGRES_DB: $CI_ENVIRONMENT_SLUG
+  POSTGRES_VERSION: 9.6.2
 
   KUBERNETES_VERSION: 1.11.9
   HELM_VERSION: 2.13.1
@@ -59,6 +59,7 @@ variables:
   ROLLOUT_RESOURCE_TYPE: deployment
   
   CI_PROJECT_PATH_SLUG: bell
+  KUBE_NAMESPACE: bell
 
 stages:
   - build
