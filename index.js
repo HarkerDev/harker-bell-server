@@ -5,7 +5,7 @@ const socket=require("socket.io");
 app.get("/", (req, res)=>{
   res.send("YAY IT WORKY");
 });
-const server=app.listen(process.env.PORT, ()=>{
+const server=app.listen(5000, ()=>{
   console.log("server is running on port");
 });
 const io=socket(server, {pingTimeout: 30000}); // consider increasing pingTimeout
