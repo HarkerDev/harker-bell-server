@@ -61,11 +61,6 @@ variables:
   CI_PROJECT_PATH_SLUG: bell
   KUBE_NAMESPACE: bell
 
-before_script:
-  - echo $PORT >> .env
-  - echo $DB_HOST >> .env
-  - echo $DB_NANE >> .env
-
 stages:
   - build
   - test

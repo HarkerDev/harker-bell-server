@@ -3,8 +3,7 @@ const app = require("express")();
 const socket = require("socket.io");
 const MongoClient = require("mongodb").MongoClient;
 
-console.log("DB_URL: "+process.env.DB_URL);
-MongoClient.connect(process.env.DB_URL).then(client => {
+MongoClient.connect(process.env.DB_HOST).then(client => {
   const db = client.db(process.env.DB_NAME);
   
 }).catch(err => {
@@ -13,7 +12,7 @@ MongoClient.connect(process.env.DB_URL).then(client => {
 })
 
 app.get("/", (req, res) => {
-  res.send("YAY IT WORKY");
+  res.send(process.env.HOST);
 });
 app.post("/assistant", (req, res) => {
   
