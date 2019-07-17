@@ -12,7 +12,7 @@ MongoClient.connect(process.env.DB_HOST).then(client => {
 })
 
 app.get("/", (req, res) => {
-  res.send(process.env.HOST);
+  res.send(process.env);
 });
 app.post("/assistant", (req, res) => {
   
