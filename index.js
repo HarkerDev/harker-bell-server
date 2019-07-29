@@ -11,11 +11,13 @@ MongoClient.connect(process.env.DB_HOST).then(client => {
   throw err;
 })
 
+app.use(express.json());
+
 app.get("/", (req, res) => {
   res.send(process.env);
 });
 app.post("/assistant", (req, res) => {
-  
+  res.send(req.body);
 });
 
 const server = app.listen(5000, () => {
