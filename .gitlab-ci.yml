@@ -60,6 +60,8 @@ variables:
   
   CI_PROJECT_PATH_SLUG: bell
   KUBE_NAMESPACE: bell
+  
+  TEST_DISABLED: true
 
 stages:
   - build
