@@ -64,9 +64,9 @@ variables:
   TEST_DISABLED: "true"
 
 before_script:
-  - "echo \"DB_NAME: $DB_NAME\" >> .env"
-  - "echo \"DB_HOST: $DB_HOST\" >> .env"
-  - "echo \"PORT: $PORT\" >> .env"
+  - "echo \"DB_NAME=$DB_NAME\" >> .env"
+  - "echo \"DB_HOST=$DB_HOST\" >> .env"
+  - "echo \"PORT=$PORT\" >> .env"
 
 stages:
   - build
