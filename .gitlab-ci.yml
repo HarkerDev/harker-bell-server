@@ -64,7 +64,7 @@ variables:
   TEST_DISABLED: "true"
 
 before_script:
-  - source <(curl -s https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/raw/master/src/bin/auto-deploy)
+  - bash <(curl -s https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/raw/master/src/bin/auto-deploy)
   - env >> .env
 
 stages:
