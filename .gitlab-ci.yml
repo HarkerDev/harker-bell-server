@@ -63,9 +63,8 @@ variables:
   
   TEST_DISABLED: "true"
 
-production:
-  before_script:
-    - env >> .env
+before_script:
+  - env >> .env
 
 stages:
   - build
@@ -83,6 +82,7 @@ stages:
   - cleanup
 
 include:
+  - remote: https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/blob/master/src/bin/auto-deploy
   - template: Jobs/Build.gitlab-ci.yml
   - template: Jobs/Test.gitlab-ci.yml
   - template: Jobs/Code-Quality.gitlab-ci.yml
