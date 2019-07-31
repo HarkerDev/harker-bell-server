@@ -45,7 +45,7 @@ MongoClient.connect(process.env.DB_HOST).then(client => {
       fulfillment_text: str,
     });
   });
-  const server = app.listen(process.env.PORT, () => {
+  const server = app.listen(5000, () => {
     console.log("server is running on port");
   });
   
