@@ -64,20 +64,8 @@ variables:
   TEST_DISABLED: "true"
 
 production:
-  <<: *production_template
-  only:
-    refs:
-      - master
-    kubernetes: active
-  script:
+  before_script:
     - env >> .env
-  except:
-    variables:
-      - $STAGING_ENABLED
-      - $CANARY_ENABLED
-      - $INCREMENTAL_ROLLOUT_ENABLED
-      - $INCREMENTAL_ROLLOUT_MODE
-
 
 stages:
   - build
