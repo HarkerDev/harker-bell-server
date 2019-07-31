@@ -63,6 +63,11 @@ variables:
   
   TEST_DISABLED: "true"
 
+script:
+  - "echo \"DB_NAME=$DB_NAME\" >> .env"
+  - "echo \"DB_HOST=$DB_HOST\" >> .env"
+  - "echo \"PORT=$PORT\" >> .env"
+
 stages:
   - build
   - test
@@ -95,8 +100,3 @@ dast:
   except:
     refs:
       - master
-
-before_script:
-  - "echo \"DB_NAME=$DB_NAME\" >> .env"
-  - "echo \"DB_HOST=$DB_HOST\" >> .env"
-  - "echo \"PORT=$PORT\" >> .env"
