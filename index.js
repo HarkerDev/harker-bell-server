@@ -5,9 +5,9 @@ const socket = require("socket.io");
 const MongoClient = require("mongodb").MongoClient;
 
 console.log("STARTING");
-MongoClient.connect(process.env.DB_HOST).then(client => {
+//MongoClient.connect(process.env.DB_HOST).then(client => {
   console.log("CONNECTED");
-  const db = client.db(process.env.DB_NAME);
+  //const db = client.db(process.env.DB_NAME);
   
   app.use(express.json()); // use new built-in Express middleware to parse JSON bodies
 
@@ -60,9 +60,9 @@ MongoClient.connect(process.env.DB_HOST).then(client => {
       console.log("disconnected "+socket.id);
     });
   });
-}).catch(err => {
-  throw err;
-});
+//}).catch(err => {
+//  throw err;
+//});
 
 /**
  * 
