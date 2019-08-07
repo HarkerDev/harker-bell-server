@@ -29,7 +29,7 @@ MongoClient.connect(process.env.DB_HOST).then(client => {
     let schedule = await db.collection("schedules").findOne({date});
     let str = "";
     if (schedule) {
-      str += formattedDate+(now-date>now.getTimezoneOffset()*60*1000 ? " is " : " was ");
+      str += formattedDate+(now-date<(now.getTimezoneOffset()+24*60)*60*1000 ? " is " : " was ");
       if (schedule.variant) {
         str += startsWithVowel(schedule.variant) ? "an " : "a ";
         str += schedule.variant+' "'+schedule.code+'"';
