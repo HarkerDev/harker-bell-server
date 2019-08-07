@@ -17,7 +17,7 @@ MongoClient.connect(process.env.DB_HOST).then(client => {
   /** Responds with the bell schedule when a request from Actions on Google/Google Assistant is received. */
   app.post("/assistant", async (req, res) => {
     /** @type {Date} */
-    let date = new Date(req.body.queryResult.parameters.date);
+    let date = new Date(req.body.queryResult.parameters.date.substring(0, 10));
     const now = new Date();
     let formattedDate = date.toLocaleDateString(undefined, {
       timeZone: "UTC",
@@ -56,8 +56,14 @@ MongoClient.connect(process.env.DB_HOST).then(client => {
     setTimeout(() => {
       io.emit("test", "10 seconds later");
     }, 10000);
-    socket.on("disconnect", () => {
+    socket.on("initial date", data => {
+      
+    });
+    socket.on("disconnect", err => {
       console.log("disconnected "+socket.id);
+    });
+    socket.on("error", err => {
+      console.error(err);
     });
   });
 }).catch(err => {
