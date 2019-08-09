@@ -50,8 +50,8 @@ MongoClient.connect(process.env.DB_HOST).then(client => {
   });
   
   const io = socket(server, {
-    pingTimeout: process.env.SOCKET_PING_TIMEOUT, // consider increasing pingTimeout
-    pingInterval: process.env.SOCKET_PING_INTERVAL,
+    pingTimeout: 10000, // consider increasing pingTimeout
+    pingInterval: 10000,
   });
   io.on("connection", socket => {
     console.log("connected "+socket.id);
