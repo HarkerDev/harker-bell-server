@@ -29,7 +29,7 @@ MongoClient.connect(process.env.DB_HOST).then(client => {
     let schedule = await db.collection("schedules").findOne({date});
     let str = "";
     if (schedule) {
-      str += formattedDate+(now-date<(now.getTimezoneOffset()+24*60)*60*1000 ? " is " : " was ");
+      str += formattedDate+(now-date < (now.getTimezoneOffset()+24*60)*60*1000 ? " is " : " was ");
       if (schedule.variant) {
         str += startsWithVowel(schedule.variant) ? "an " : "a ";
         str += schedule.variant+' "'+schedule.code+'"';
@@ -37,9 +37,9 @@ MongoClient.connect(process.env.DB_HOST).then(client => {
         str += startsWithVowel(schedule.code) ? "an " : "a ";
         str += '"'+schedule.code+'"';
       }
-      str += " day."
+      str += " schedule."
     } else {
-      str += "Sorry, I couldn't find a schedule for "+formattedDate+".";
+      str += `Sorry, I couldn't find a schedule for ${formattedDate}.`;
     }
     res.send({
       fulfillment_text: str,
@@ -49,7 +49,10 @@ MongoClient.connect(process.env.DB_HOST).then(client => {
     console.log("server is running on port");
   });
   
-  const io = socket(server, {pingTimeout: 30000}); // consider increasing pingTimeout
+  const io = socket(server, {
+    pingTimeout: process.env.SOCKET_PING_TIMEOUT, // consider increasing pingTimeout
+    pingInterval: process.env.SOCKET_PING_INTERVAL,
+  });
   io.on("connection", socket => {
     console.log("connected "+socket.id);
     io.emit("test", "heyy");
