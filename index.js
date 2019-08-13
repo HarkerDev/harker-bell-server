@@ -52,22 +52,34 @@ MongoClient.connect(process.env.DB_HOST).then(client => {
   const io = socket(server, {
     pingTimeout: 10000, // consider increasing pingTimeout
     pingInterval: 10000,
+    origins: [
+      "https://harker-bell.netlify.com:443",
+      "https://bell.harker.org:443",
+      "http://localhost:8080",
+    ]
   });
-  io.on("connection", socket => {
+  io.on("connection", async socket => {
     console.log("connected "+socket.id);
-    io.emit("test", "heyy");
-    setTimeout(() => {
-      io.emit("test", "10 seconds later");
-    }, 10000);
-    socket.on("initial date", data => {
-      
-    });
     socket.on("disconnect", err => {
       console.log("disconnected "+socket.id);
     });
     socket.on("error", err => {
       console.error(err);
     });
+    socket.on("request schedule", async (data, callback) => {
+      console.log(data);
+      let schedules = await db.collection("schedules").find({
+        date: {
+          $gte: new Date(data.start),
+          $lte: new Date(data.end)
+        }
+      });
+      callback(await schedules.toArray());
+    });
+    socket.on("request update", async (revision, callback) => {
+      
+    });
+    socket.emit("update message", (await db.collection("misc").findOne({type: "message"})).message);
   });
 }).catch(err => {
   throw err;
