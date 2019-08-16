@@ -2,21 +2,20 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const socket = require("socket.io");
-const MongoClient = require("mongodb").MongoClient;
+const mongodb = require("./db");
 
 console.log("STARTING");
-MongoClient.connect(process.env.DB_HOST).then(client => {
+app.use(express.json()); // use new built-in Express middleware to parse JSON bodies
+mongodb.connect().then(db => {
   console.log("CONNECTED");
-  const db = client.db(process.env.DB_NAME);
-  
-  app.use(express.json()); // use new built-in Express middleware to parse JSON bodies
+  const adminRoutes = require("./admin");
+  app.use("/admin", adminRoutes);
 
   app.get("/", (req, res) => {
     res.send(process.env);
   });
   /** Responds with the bell schedule when a request from Actions on Google/Google Assistant is received. */
   app.post("/assistant", async (req, res) => {
-    /** @type {Date} */
     let date = new Date(req.body.queryResult.parameters.date.substring(0, 10));
     const now = new Date();
     let formattedDate = date.toLocaleDateString(undefined, {
@@ -45,8 +44,8 @@ MongoClient.connect(process.env.DB_HOST).then(client => {
       fulfillment_text: str,
     });
   });
-  const server = app.listen(5000, () => {
-    console.log("server is running on port");
+  const server = app.listen(process.env.PORT, () => {
+    console.log("server is running on port "+process.env.PORT);
   });
   
   const io = socket(server, {
@@ -56,6 +55,7 @@ MongoClient.connect(process.env.DB_HOST).then(client => {
       "https://harker-bell.netlify.com:443",
       "https://bell.harker.org:443",
       "http://localhost:8080",
+      "http://192.168.1.209:8080",
     ]
   });
   io.on("connection", async socket => {
