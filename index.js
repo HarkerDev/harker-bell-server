@@ -3,13 +3,15 @@ const express = require("express");
 const app = express();
 const socket = require("socket.io");
 const mongodb = require("./db");
+const socketio = require("./socket");
 
 console.log("STARTING");
-app.use(express.json()); // use new built-in Express middleware to parse JSON bodies
+app.use(express.json()); // use new built-in Express middleware
+app.use(express.urlencoded());
 mongodb.connect().then(db => {
   console.log("CONNECTED");
-  const adminRoutes = require("./admin");
-  app.use("/admin", adminRoutes);
+  app.use("/api", require("./api"));
+  app.use("/admin", require("./admin"));
 
   app.get("/", (req, res) => {
     res.send(process.env);
@@ -48,38 +50,30 @@ mongodb.connect().then(db => {
     console.log("server is running on port "+process.env.PORT);
   });
   
-  const io = socket(server, {
-    pingTimeout: 10000, // consider increasing pingTimeout
-    pingInterval: 10000,
-    origins: [
-      "https://harker-bell.netlify.com:443",
-      "https://bell.harker.org:443",
-      "http://localhost:8080",
-      "http://192.168.1.209:8080",
-    ]
-  });
-  io.on("connection", async socket => {
-    console.log("connected "+socket.id);
-    socket.on("disconnect", err => {
-      console.log("disconnected "+socket.id);
-    });
-    socket.on("error", err => {
-      console.error(err);
-    });
-    socket.on("request schedule", async (data, callback) => {
-      console.log(data);
-      let schedules = await db.collection("schedules").find({
-        date: {
-          $gte: new Date(data.start),
-          $lte: new Date(data.end)
-        }
+  socketio.connect(server).then(io => {
+    io.on("connection", async socket => {
+      console.log("connected "+socket.id);
+      socket.on("disconnect", err => {
+        console.log("disconnected "+socket.id);
       });
-      callback(await schedules.toArray());
+      socket.on("error", err => {
+        console.error(err);
+      });
+      socket.on("request schedule", async (data, callback) => {
+        console.log(data);
+        let schedules = await db.collection("schedules").find({
+          date: {
+            $gte: new Date(data.start),
+            $lte: new Date(data.end)
+          }
+        });
+        callback(await schedules.toArray());
+      });
+      socket.on("request update", async (revision, callback) => {
+        
+      });
+      socket.emit("update message", (await db.collection("misc").findOne({type: "message"})).message);
     });
-    socket.on("request update", async (revision, callback) => {
-      
-    });
-    socket.emit("update message", (await db.collection("misc").findOne({type: "message"})).message);
   });
 }).catch(err => {
   throw err;
