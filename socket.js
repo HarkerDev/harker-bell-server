@@ -8,10 +8,12 @@ async function connect(server) {
       pingTimeout: 10000, // consider increasing pingTimeout
       pingInterval: 10000,
       origins: [
-        "https://harker-bell.netlify.com:443",
-        "https://bell.harker.org:443",
-        "http://localhost:8080",
-        "http://192.168.1.209:8080",
+        "bell.harker.org:443",
+        "bell.harker.org:80",
+        "harker-bell.netlify.com:443",
+        "harker-bell.netlify.com:80",
+        "localhost:8080",
+        "192.168.1.209:8080",
       ]
     });
   } catch (err) {
