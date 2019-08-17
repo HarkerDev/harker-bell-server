@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const socket = require("socket.io");
+const {ObjectId} = require("mongodb");
 const mongodb = require("./db");
 const socketio = require("./socket");
 
@@ -69,8 +70,30 @@ mongodb.connect().then(db => {
         });
         callback(await schedules.toArray());
       });
-      socket.on("request update", async (revision, callback) => {
-        
+      socket.on("request update", async revision => {
+        if (revision) {
+          let revisions = await db.collection("revisions").find({_id: {
+            $gt: new ObjectId(revision)
+          }});
+          revisions = await revisions.toArray();
+          let changes = new Set();
+          for (const revision of revisions)
+            for (const date of revision.changes)
+              changes.add(date.getTime());
+          let schedules = [];
+          for (const date of changes) {
+            console.log(date);
+            let schedule = await db.collection("schedules").findOne({date: new Date(date)});
+            if (schedule) schedules.push(schedule);
+          }
+          socket.emit("update schedule", schedules, revisions[revisions.length-1] ? revisions[revisions.length-1]._id : null);
+        } else {
+          let schedules = await db.collection("schedules").find();
+          schedules = await schedules.toArray();
+          let lastRevision = await db.collection("revisions").find().limit(1).sort({_id: -1});
+          lastRevision = await lastRevision.toArray();
+          socket.emit("update schedule", schedules, lastRevision[0]._id);
+        }
       });
       socket.emit("update message", (await db.collection("misc").findOne({type: "message"})).message);
     });

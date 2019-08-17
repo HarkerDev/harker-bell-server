@@ -9,15 +9,15 @@ const socket = require("./socket");
  * Gets the user's authentication document with available permissions based on the access token.
  * @param {string} access_token access token required for authentication
  * @param {string} permission   the name of the permission required for the desired action
- * @return {boolean}            true if the access token is valid and the user has the necessary permission;
- *                              otherwise, false
+ * @return {Object|boolean}     auth object if the access token is valid and the user has the
+ *                              necessary permission; otherwise, false
  */
 async function ensureAuth(access_token, permission) {
   let auth = await db.collection("users").findOne({access_token: {
     $exists: true,
     $eq: access_token,
   }});
-  if (auth && auth.permissions.includes(permission)) return true;
+  if (auth && auth.permissions.includes(permission)) return auth;
   return false;
 }
 /**
@@ -26,13 +26,13 @@ async function ensureAuth(access_token, permission) {
  * @param {Date[]} changes  array of dates for each schedule that was modified
  */
 async function createNewRevision(name, changes, schedules) {
-  await db.collection("revisions").insertOne({
+  let result = await db.collection("revisions").insertOne({
     timestamp: new Date(),
     changes,
     name,
   });
   const io = socket.get();
-  io.emit("update schedule", schedules);
+  io.emit("update schedule", schedules, result.insertedId);
 }
 /**
  * Updates the live message displayed on all connected bell schedule clients.
@@ -41,18 +41,18 @@ async function createNewRevision(name, changes, schedules) {
  */
 router.post("/editMessage", async (req, res) => {
   try {
-    if (!await ensureAuth(req.body.access_token, "editMessage"))
-      return res.status(400).send("Unauthorized access.");
+    const auth = await ensureAuth(req.body.access_token, "editMessage");
+    if (!auth) return res.status(400).send("Unauthorized access.");
     await db.collection("misc").updateOne({type: "message"}, {
       $set: {message: req.body.message}
     });
     const io = socket.get();
     io.emit("update message", req.body.message);
+    return res.send("Success.");
   } catch (err) {
     console.error(err);
     return res.status(500).send(err);
   }
-  res.send("Success.");
 });
 /**
  * Autofills the bell schedule and saves it to the database.
@@ -67,8 +67,8 @@ router.post("/editMessage", async (req, res) => {
  */
 router.post("/autofillSchedule", async (req, res) => {
   try {
-    if (!await ensureAuth(req.body.access_token, "bulkWrite"))
-      return res.status(401).send("Unauthorized access.");
+    const auth = await ensureAuth(req.body.access_token, "bulkWrite");
+    if (!auth) return res.status(401).send("Unauthorized access.");
     if (new Date().toISOString().substr(0, 18) !== req.body.current_date.substr(0, 18)) // max 10-second window
       return res.status(400).send("Timestamp validation failed.");
     let index = 0;
@@ -112,6 +112,7 @@ router.post("/autofillSchedule", async (req, res) => {
     }
     const session = client.startSession();
     await session.withTransaction(async () => {
+      let insertedSchedules = [];
       for (const schedule of schedules) {
         await db.collection("schedules").updateOne({date: schedule.date}, {
           $set: schedule,
@@ -121,14 +122,15 @@ router.post("/autofillSchedule", async (req, res) => {
             events: [],
           }
         }, {upsert: true});
+        insertedSchedules.push(await db.collection("schedules").findOne({date: schedule.date}));
       }
-      await createNewRevision(auth.name, dates, schedules);
+      await createNewRevision(auth.name, dates, insertedSchedules);
     });
+    return res.send("Successfully updated "+dates.length+" schedule(s).");
   } catch (err) {
     console.error(err);
     return res.status(500).send(err);
   }
-  res.send("Successfully updated "+dates.length+" schedule(s).");
 });
 /**
  * Adds holidays (i.e. days with no school) to the schedule collection.
@@ -137,10 +139,10 @@ router.post("/autofillSchedule", async (req, res) => {
  * @param {string} end          end date of the holiday or break in ISO format, at UTC midnight
  * @param {string} name         name of the holiday or break
  */
-router.get("/addHolidays", async (req, res) => {
+router.post("/addHolidays", async (req, res) => {
   try {
-    if (!await ensureAuth(req.body.access_token, "bulkWrite"))
-      return res.status(401).send("Unauthorized access.");
+    const auth = await ensureAuth(req.body.access_token, "bulkWrite");
+    if (!auth) return res.status(401).send("Unauthorized access.");
     let schedules = [], dates = [];
     let end = new Date(req.body.end);
     for (let date = new Date(req.body.start); date <= end; date.setUTCDate(date.getUTCDate()+1)) {
@@ -156,6 +158,7 @@ router.get("/addHolidays", async (req, res) => {
     }
     const session = client.startSession();
     await session.withTransaction(async () => {
+      let insertedSchedules = [];
       for (const schedule of schedules) {
         await db.collection("schedules").updateOne({date: schedule.date}, {
           $set: schedule,
@@ -165,14 +168,15 @@ router.get("/addHolidays", async (req, res) => {
             events: [],
           }
         }, {upsert: true});
+        insertedSchedules.push(await db.collection("schedules").findOne({date: schedule.date}));
       }
-      await createNewRevision(auth.name, dates);
+      await createNewRevision(auth.name, dates, insertedSchedules);
     });
+    return res.send("Successfully updated "+dates.length+" schedule(s).");
   } catch (err) {
     console.error(err);
     return res.status(500).send(err);
   }
-  res.send("Successfully updated "+dates.length+" schedule(s).");
 });
 /**
  * Modifies the schedule for a single day. This should NOT be used to change the
@@ -182,8 +186,8 @@ router.get("/addHolidays", async (req, res) => {
  */
 router.post("/editSchedule", async (req, res) => {
   try {
-    if (!await ensureAuth(req.body.access_token, "singleWrite"))
-      return res.status(401).send("Unauthorized access.");
+    const auth = await ensureAuth(req.body.access_token, "singleWrite");
+    if (!auth) return res.status(401).send("Unauthorized access.");
     const schedule = req.body.schedule;
     const session = client.startSession();
     await session.withTransaction(async () => {
@@ -195,13 +199,14 @@ router.post("/editSchedule", async (req, res) => {
           events: [],
         }
       }, {upsert: true});
-      await createNewRevision(auth.name, dates);
+      let insertedSchedule = await db.collection("schedules").findOne({date: schedule.date});
+      await createNewRevision(auth.name, dates, insertedSchedule);
     });
+    return res.send("Success");
   } catch (err) {
     console.error(err);
     return res.status(500).send(err);
   }
-  res.send("Success");
 });
 
 module.exports = router;
