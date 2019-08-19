@@ -1,6 +1,7 @@
 const express = require("express")
 const router = express.Router();
 const db = require("./db").get();
+const socket = require("./socket");
 
 // NOTE: All public APIs can be accessed using URL encoded or JSON request bodies.
 
@@ -64,6 +65,12 @@ router.get("/events", async (req, res) => {
     console.error(err);
     return res.status(500).send(err);
   }
+});
+/**
+ * Gets the number of currently connected clients.
+ */
+router.get("/clients", (req, res) => {
+  return res.send(socket.get().engine.clientsCount.toString());
 });
 
 module.exports = router;

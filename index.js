@@ -5,8 +5,14 @@ const socket = require("socket.io");
 const {ObjectId} = require("mongodb");
 const mongodb = require("./db");
 const socketio = require("./socket");
+const sentry = require("@sentry/node");
 
+sentry.init({
+  dsn: process.env.SENTRY,
+  release: "harker-bell-server@"+require("./package.json").version,
+});
 console.log("STARTING");
+app.use(sentry.Handlers.requestHandler());
 app.use(express.json()); // use new built-in Express middleware
 app.use(express.urlencoded());
 mongodb.connect().then(db => {
@@ -47,6 +53,7 @@ mongodb.connect().then(db => {
       fulfillment_text: str,
     });
   });
+  app.use(sentry.Handlers.errorHandler());
   const server = app.listen(process.env.PORT, () => {
     console.log("server is running on port "+process.env.PORT);
   });
