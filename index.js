@@ -1,7 +1,6 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
-const socket = require("socket.io");
 const {ObjectId} = require("mongodb");
 const mongodb = require("./db");
 const socketio = require("./socket");

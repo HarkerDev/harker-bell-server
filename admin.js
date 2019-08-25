@@ -118,7 +118,6 @@ router.post("/autofillSchedule", async (req, res) => {
           $set: schedule,
           $setOnInsert: {
             lunch: [],
-            locations: [],
             events: [],
           }
         }, {upsert: true});
@@ -151,7 +150,7 @@ router.post("/addHolidays", async (req, res) => {
       let schedule = {
         date: new Date(date),
         schedule: [],
-        holiday: req.body.name,
+        name: req.body.name,
       };
       dates.push(schedule.date);
       schedules.push(schedule);
@@ -164,7 +163,6 @@ router.post("/addHolidays", async (req, res) => {
           $set: schedule,
           $setOnInsert: {
             lunch: [],
-            locations: [],
             events: [],
           }
         }, {upsert: true});
@@ -180,29 +178,70 @@ router.post("/addHolidays", async (req, res) => {
 });
 /**
  * Modifies the schedule for a single day. This should NOT be used to change the
- * lunch menu, locations, or events (only schedule, code, variant, preset, and holiday).
+ * lunch menu or events (only schedule, code, variant, preset, and name).
  * @param {string} access_token access token required for authentication
- * @param {Object[]} schedule   array of period objects representing the new schedule
+ * @param {Object} schedule     the new schedule (lunch and events will NOT be modified)
  */
 router.post("/editSchedule", async (req, res) => {
   try {
     const auth = await ensureAuth(req.body.access_token, "singleWrite");
     if (!auth) return res.status(401).send("Unauthorized access.");
     const schedule = req.body.schedule;
+    const date = new Date(schedule.date);
+    if (schedule.schedule)
+      for (const period of schedule.schedule) {
+        if (period.start) period.start = new Date(period.start);
+        if (period.end) period.end = new Date(period.end);
+      }
     const session = client.startSession();
     await session.withTransaction(async () => {
-      await db.collection("schedules").updateOne({date: schedule.date}, {
-        $set: schedule,
+      await db.collection("schedules").updateOne({date}, {
+        $set: {
+          ...(schedule.schedule && {schedule: schedule.schedule}),
+          ...(schedule.preset && {preset: schedule.preset}),
+          ...(schedule.code && {code: schedule.code}),
+          ...(schedule.variant && {variant: schedule.variant}),
+          ...(schedule.name && {name: schedule.name}),
+        },
         $setOnInsert: {
           lunch: [],
-          locations: [],
           events: [],
         }
       }, {upsert: true});
-      let insertedSchedule = await db.collection("schedules").findOne({date: schedule.date});
-      await createNewRevision(auth.name, dates, insertedSchedule);
+      let insertedSchedule = await db.collection("schedules").findOne({date});
+      await createNewRevision(auth.name, [date], insertedSchedule);
     });
-    return res.send("Success");
+    return res.send("Success.");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send(err);
+  }
+});
+/**
+ * Adds additional events to the list of events for a certain day. Remevos existing events if so desired.
+ * @param {string} access_token access token required for authentication
+ * @param {string} date         date to which the events should be added, in ISO format
+ * @param {Object[]} events     list of events to be added
+ * @param {boolean} clear_all   whether or not all existing events should be removed before adding new ones
+ */
+router.post("/addEvents", async (req, res) => {
+  try {
+    const auth = await ensureAuth(req.body.access_token, "singleWrite");
+    if (!auth) return res.status(401).send("Unauthorized access.");
+    const date = new Date(req.body.date)
+    const session = client.startSession();
+    await session.withTransaction(async () => {
+      await db.collection("schedules").updateOne({date}, req.body.clear_all == true ? {
+        $set: {events: req.body.events}
+      } : {
+        $push: {
+          events: {$each: req.body.events}
+        }
+      });
+      let insertedSchedule = await db.collection("schedules").findOne({date});
+      await createNewRevision(auth.name, [date], insertedSchedule);
+    });
+    return res.send("Success.");
   } catch (err) {
     console.error(err);
     return res.status(500).send(err);
