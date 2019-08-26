@@ -218,7 +218,7 @@ router.post("/editSchedule", async (req, res) => {
   }
 });
 /**
- * Adds additional events to the list of events for a certain day. Remevos existing events if so desired.
+ * Adds additional events to the list of events for a certain day. Removes existing events if so desired.
  * @param {string} access_token access token required for authentication
  * @param {string} date         date to which the events should be added, in ISO format
  * @param {Object[]} events     list of events to be added
@@ -228,14 +228,50 @@ router.post("/addEvents", async (req, res) => {
   try {
     const auth = await ensureAuth(req.body.access_token, "singleWrite");
     if (!auth) return res.status(401).send("Unauthorized access.");
-    const date = new Date(req.body.date)
+    const date = new Date(req.body.date);
+    const events = req.body.events;
+    for (const event of events) {
+      event.start = new Date(event.start);
+      event.end = new Date(event.end);
+    }
     const session = client.startSession();
     await session.withTransaction(async () => {
       await db.collection("schedules").updateOne({date}, req.body.clear_all == true ? {
-        $set: {events: req.body.events}
+        $set: {events}
       } : {
         $push: {
-          events: {$each: req.body.events}
+          events: {$each: events}
+        }
+      });
+      let insertedSchedule = await db.collection("schedules").findOne({date});
+      await createNewRevision(auth.name, [date], insertedSchedule);
+    });
+    return res.send("Success.");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send(err);
+  }
+});
+/**
+ * Changes the lunch menu for a certain day. Removes the existing lunch items if so desired.
+ * @param {string} access_token access token required for authentication
+ * @param {string} date         date to which the lunch should be added, in ISO format
+ * @param {Object[]} lunch      list of menu items to be added
+ * @param {boolean} clear_all   whether or not all existing menu items should be removed before adding new ones
+ */
+router.post("/addLunch", async (req, res) => {
+  try {
+    const auth = await ensureAuth(req.body.access_token, "singleWrite");
+    if (!auth) return res.status(401).send("Unauthorized access.");
+    const date = new Date(req.body.date);
+    const lunch = req.body.lunch;
+    const session = client.startSession();
+    await session.withTransaction(async () => {
+      await db.collection("schedules").updateOne({date}, req.body.clear_all == true ? {
+        $set: {lunch: lunch}
+      } : {
+        $push: {
+          lunch: {$each: lunch}
         }
       });
       let insertedSchedule = await db.collection("schedules").findOne({date});
