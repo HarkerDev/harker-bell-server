@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require("./db").get();
 const socket = require("./socket");
 
-// NOTE: All public APIs can be accessed using URL encoded or JSON request bodies.
+// NOTE: All public APIs can be used by providing URL encoded or JSON request bodies.
 
 /**
  * Retrieves the bell schedule for a single day.

@@ -55,6 +55,21 @@ router.post("/editMessage", async (req, res) => {
   }
 });
 /**
+ * Inserts a schedule preset into the database.
+ * @param {string} access_token access token required for authentication
+ * @param {preset} preset       the preset to be added (must satisfy the database schema)
+ */
+router.post("/addPreset", async (req, res) => {
+  try {
+    const auth = await ensureAuth(req.body.access_token, "singleWrite");
+    if (!auth) return res.status(401).send("Unauthorized access.");
+    await db.collection("presets").insertOne(req.body.preset);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send(err);
+  }
+});
+/**
  * Autofills the bell schedule and saves it to the database.
  * This code will need to be rewritten if the schedule rotation is changed in the future.
  * @param {string} access_token access token required for authentication
