@@ -262,12 +262,15 @@ router.post("/addEvents", async (req, res) => {
     }
     const session = client.startSession();
     await session.withTransaction(async () => {
-      await db.collection("schedules").updateOne({date}, req.body.clear_all == true ? {
+      if (!req.body.clear_all) {
+        const schedule = db.collection("schedules").findOne({date});
+        events = schedule.events.concat(events);
+        events.sort((a, b) => {
+          return +a.start == +b.start ? a.end-b.end : a.start-b.start;
+        });
+      }
+      await db.collection("schedules").updateOne({date}, {
         $set: {events}
-      } : {
-        $push: {
-          events: {$each: events}
-        }
       });
       let insertedSchedule = await db.collection("schedules").findOne({date});
       await createNewRevision(auth.name, [date], [insertedSchedule]);
