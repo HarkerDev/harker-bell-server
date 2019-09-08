@@ -32,8 +32,9 @@ async function ensureAuth(access_token, permission) {
 }
 /**
  * Saves a new revision and pushes  schedule changes to all connected clients.
- * @param {string} name     name of the author of the revision
- * @param {Date[]} changes  array of dates for each schedule that was modified
+ * @param {string} name         name of the author of the revision
+ * @param {Date[]} changes      array of dates for each schedule that was modified
+ * @param {Object[]} schedules  array of schedules
  */
 async function createNewRevision(name, changes, schedules) {
   let result = await db.collection("revisions").insertOne({
@@ -234,7 +235,7 @@ router.post("/editSchedule", async (req, res) => {
         }
       }, {upsert: true});
       let insertedSchedule = await db.collection("schedules").findOne({date});
-      await createNewRevision(auth.name, [date], insertedSchedule);
+      await createNewRevision(auth.name, [date], [insertedSchedule]);
     });
     return res.send("Success.");
   } catch (err) {
@@ -269,7 +270,7 @@ router.post("/addEvents", async (req, res) => {
         }
       });
       let insertedSchedule = await db.collection("schedules").findOne({date});
-      await createNewRevision(auth.name, [date], insertedSchedule);
+      await createNewRevision(auth.name, [date], [insertedSchedule]);
     });
     return res.send("Success.");
   } catch (err) {
@@ -280,27 +281,30 @@ router.post("/addEvents", async (req, res) => {
 /**
  * Changes the lunch menu for a certain day. Removes the existing lunch items if so desired.
  * @param {string} access_token access token required for authentication
- * @param {string} date         date to which the lunch should be added, in ISO format
- * @param {Object[]} lunch      list of menu items to be added
+ * @param {Object} lunch      list of menu items to be added
  * @param {boolean} clear_all   whether or not all existing menu items should be removed before adding new ones
  */
 router.post("/addLunch", async (req, res) => {
   try {
     const auth = await ensureAuth(req.body.access_token, "singleWrite");
     if (!auth) return res.status(401).send("Unauthorized access.");
-    const date = new Date(req.body.date);
-    const lunch = req.body.lunch;
     const session = client.startSession();
     await session.withTransaction(async () => {
-      await db.collection("schedules").updateOne({date}, req.body.clear_all == true ? {
-        $set: {lunch: lunch}
-      } : {
-        $push: {
-          lunch: {$each: lunch}
-        }
-      });
-      let insertedSchedule = await db.collection("schedules").findOne({date});
-      await createNewRevision(auth.name, [date], insertedSchedule);
+      let dates = [];
+      let insertedSchedules = [];
+      for (const [key, lunch] of Object.entries(req.body.lunch)) {
+        const date = new Date(key);
+        dates.push(date);
+        await db.collection("schedules").updateOne({date}, req.body.clear_all == true ? {
+          $set: {lunch}
+        } : {
+          $push: {
+            lunch: {$each: lunch}
+          }
+        });
+        insertedSchedules.push(await db.collection("schedules").findOne({date}));
+      }
+      await createNewRevision(auth.name, dates, insertedSchedules);
     });
     return res.send("Success.");
   } catch (err) {
@@ -309,49 +313,47 @@ router.post("/addLunch", async (req, res) => {
   }
 });
 /**
- * Parses the lunch menu PDF and returns JSON containing the menu items.
+ * Parses a generated lunch menu CSV (from a PDF) and returns JSON containing the menu items for each day.
+ * NOTE: Provide parameters as a URL query string.
+ * See docs for information about getting a CSV from the lunch menu PDF.
+ * @param {string} start  start date of the lunch menu CSV
+ * @param {string} end    end date of the lunch menu CSV
  */
 router.get("/generateLunch", (req, res) => {
-  /** @type {string} */
-  const raw = req.text;
   const data = parse(req.text, {
     columns: true,
   });
-  console.log(data);
-  return res.send(data);
-  /*let menus = {};
-  let index = raw.indexOf("Monday");
-  let locationStack = [], itemStack = [];
-  let gap = false;
-  let queued = null;
-  while (index != -1) {
-    let line = raw.substring(index+1, raw.indexOf("\n", index+1));
-    if (line == line.toUpperCase()) {
-      locationStack.push(line);
-      gap = false;
-      queued = addQueued(queued, menus);
-    } else if (line.length == 0) {
-      gap = true;
-      queued = addQueued(queued, menus);
-    } else if (!gap) {
-      if (!queued.loc)
-        queued.loc = locationStack.pop().toLowerCase().split(" ").map(str => str.charAt(0).toUpperCase()+str.substring(1)).join(" ");;
-      if (!queued.item) queued.item = line;
-      else queued.item += "\n"+line;
-    }
-  }*/
+  let menus = {};
+  for (const [header, value] of Object.entries(data[0]))
+    if (value) menus[header] = [];
+  for (const row of data)
+    for (const [header, value] of Object.entries(row))
+      if (menus[header] && value) {
+        if (value == value.toUpperCase())
+          menus[header].push({place: properCase(value), food: ""});
+        else {
+          const lastItem = menus[header][menus[header].length-1];
+          if (lastItem.food) lastItem.food += "\n";
+          lastItem.food += value;
+        }
+      }
+  let dates = [];
+  let endDate = new Date(req.query.end);
+  for (let date = new Date(req.query.start); date <= endDate; date.setUTCDate(date.getUTCDate()+1))
+    dates.push(new Date(date));
+  Object.entries(menus).forEach(([header, value], index) => {
+    menus[dates[index].toISOString()] = value;
+    delete menus[header];
+  });
+  return res.send(menus);
 });
 /**
- * 
- * @param {object} queued 
- * @param {object} menus  
- * @return {null}
+ * Capitalizes only the first letter of each word.
+ * @param {string} str  the string to convert to proper case
  */
-function addQueued(queued, menus) {
-  if (queued) {
-    if (!menus[queued.location]) menus[queued.location] = [];
-    menus[queued.location].push(queued.item);
-  }
+function properCase(str) {
+  str = str.toLowerCase().split(" ").map(s => s.charAt(0).toUpperCase()+s.substring(1)).join(" ");
+  return str.replace("Bbq", "BBQ").replace("Of", "of");
 }
 
 module.exports = router;
