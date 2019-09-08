@@ -4,7 +4,17 @@ const mongodb = require("./db");
 const client = mongodb.getClient();
 const db = mongodb.get();
 const socket = require("./socket");
+const parse = require("csv-parse/lib/sync");
 
+/** For text/plain content type. Used in generateLunch. */
+router.use((req, res, next) => {
+  if (req.is("text/*")) {
+    req.text = "";
+    req.setEncoding("utf8");
+    req.on("data", chunk => {req.text += chunk});
+    req.on("end", next);
+  } else next();
+});
 /**
  * Gets the user's authentication document with available permissions based on the access token.
  * @param {string} access_token access token required for authentication
@@ -298,5 +308,50 @@ router.post("/addLunch", async (req, res) => {
     return res.status(500).send(err);
   }
 });
+/**
+ * Parses the lunch menu PDF and returns JSON containing the menu items.
+ */
+router.get("/generateLunch", (req, res) => {
+  /** @type {string} */
+  const raw = req.text;
+  const data = parse(req.text, {
+    columns: true,
+  });
+  console.log(data);
+  return res.send(data);
+  /*let menus = {};
+  let index = raw.indexOf("Monday");
+  let locationStack = [], itemStack = [];
+  let gap = false;
+  let queued = null;
+  while (index != -1) {
+    let line = raw.substring(index+1, raw.indexOf("\n", index+1));
+    if (line == line.toUpperCase()) {
+      locationStack.push(line);
+      gap = false;
+      queued = addQueued(queued, menus);
+    } else if (line.length == 0) {
+      gap = true;
+      queued = addQueued(queued, menus);
+    } else if (!gap) {
+      if (!queued.loc)
+        queued.loc = locationStack.pop().toLowerCase().split(" ").map(str => str.charAt(0).toUpperCase()+str.substring(1)).join(" ");;
+      if (!queued.item) queued.item = line;
+      else queued.item += "\n"+line;
+    }
+  }*/
+});
+/**
+ * 
+ * @param {object} queued 
+ * @param {object} menus  
+ * @return {null}
+ */
+function addQueued(queued, menus) {
+  if (queued) {
+    if (!menus[queued.location]) menus[queued.location] = [];
+    menus[queued.location].push(queued.item);
+  }
+}
 
 module.exports = router;
