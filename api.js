@@ -72,5 +72,14 @@ router.get("/events", async (req, res) => {
 router.get("/clients", (req, res) => {
   return res.send(socket.get().engine.clientsCount.toString());
 });
+/**
+ * For internal use only. Sends the number of connected clients in the form of a number of bytes.
+ */
+router.get("/clientsInternal", (req, res) => {
+  const count = socket.get().engine.clientsCount;
+  let str = "";
+  for (let i = 0; i < count; i++) str += "A";
+  return res.send(str);
+});
 
 module.exports = router;
