@@ -255,7 +255,7 @@ router.post("/addEvents", async (req, res) => {
     const auth = await ensureAuth(req.body.access_token, "singleWrite");
     if (!auth) return res.status(401).send("Unauthorized access.");
     const date = new Date(req.body.date);
-    const events = req.body.events;
+    let events = req.body.events;
     for (const event of events) {
       event.start = new Date(event.start);
       event.end = new Date(event.end);
@@ -263,7 +263,7 @@ router.post("/addEvents", async (req, res) => {
     const session = client.startSession();
     await session.withTransaction(async () => {
       if (!req.body.clear_all) {
-        const schedule = db.collection("schedules").findOne({date});
+        const schedule = await db.collection("schedules").findOne({date});
         events = schedule.events.concat(events);
         events.sort((a, b) => {
           return +a.start == +b.start ? a.end-b.end : a.start-b.start;

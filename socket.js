@@ -13,6 +13,7 @@ async function connect(server) {
         "harker-bell.netlify.com:443",
         "harker-bell.netlify.com:80",
         "localhost:8080",
+        "localhost:8081",
         "192.168.1.209:8080",
       ]
     });
