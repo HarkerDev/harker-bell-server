@@ -83,6 +83,7 @@ router.post("/addPreset", async (req, res) => {
 /**
  * Autofills the bell schedule and saves it to the database.
  * This code will need to be rewritten if the schedule rotation is changed in the future.
+ * Note that once new schedules are added, those documents cannot be deleted. Only the schedule part can.
  * @param {string} access_token access token required for authentication
  * @param {string} start        ISO string representing the first date to autofill, at UTC midnight
  * @param {string} end          ISO string representing the last date to autofill, at UTC midnight

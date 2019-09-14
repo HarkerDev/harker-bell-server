@@ -3,4 +3,11 @@ module.exports = {
   description: "hello world",
   base: "/docs/",
   head: [],
+  themeConfig: {
+    lastUpdated: "Last updated",
+    repo: "BowenYin/harker-bell",
+    sidebar: [
+      "/api"
+    ]
+  }
 }
