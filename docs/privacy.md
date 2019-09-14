@@ -1,3 +1,6 @@
+---
+search: false
+---
 # Privacy Policy
 
 This privacy policy discusses the information we collect and how we process it when you use our Bell Schedule Action (the "Service") on the Google Assistant.
