@@ -14,7 +14,7 @@ module.exports = {
       {
         title: "General",
         collapsable: false,
-        children: ["/api", "/assistant", "/features"]
+        children: ["/api", "/install", "/assistant", "/features"]
       },
       {
         title: "Internal",

@@ -9,8 +9,13 @@ code, kbd, .line-number {
 code {
   border-radius: 2px !important;
 }
+@media (max-width: $MQMobileNarrow) {
+  div[class*="language-"] {
+    border-radius: 0;
+  }
+}
 pre, pre[class*="language-"], div[class*="language-"] {
-  border-radius: 4px !important;
+  border-radius: 4px;
 }
 .custom-block.tip {
   border-color: #34A853;
