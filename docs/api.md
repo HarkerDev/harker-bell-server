@@ -26,9 +26,9 @@ Returns the bell schedule for a given date.
 #### Request Schema
 ```json
 {
-  "month": integer, // between 1 and 12
-  "day": integer, // between 1 and 31
-  "year": integer // four-digit year
+  "month": number, // between 1 and 12
+  "day": number, // between 1 and 31
+  "year": number // four-digit year
 }
 ```
 
@@ -37,6 +37,8 @@ Returns the bell schedule for a given date.
 {
   "date": string, // ISO string for the date at UTC midnight
   "code": string, // usually A, B, C, or D
+  "variant"?: string, // usually 'special' or 'adjusted', if applicable
+  "name"?: string, // name of the modified schedule or holiday
   "schedule": [
     {
       "start": string, // ISO string in UTC time
@@ -66,9 +68,9 @@ Returns the lunch menu for a given date.
 #### Request Schema
 ```json
 {
-  "month": integer, // between 1 and 12
-  "day": integer, // between 1 and 31
-  "year": integer // four-digit year
+  "month": number, // between 1 and 12
+  "day": number, // between 1 and 31
+  "year": number // four-digit year
 }
 ```
 
@@ -103,9 +105,9 @@ Returns a list of events for a given date.
 #### Request Schema
 ```json
 {
-  "month": integer, // between 1 and 12
-  "day": integer, // between 1 and 31
-  "year": integer // four-digit year
+  "month": number, // between 1 and 12
+  "day": number, // between 1 and 31
+  "year": number // four-digit year
 }
 ```
 
