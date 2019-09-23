@@ -102,6 +102,7 @@ router.post("/autofillSchedule", async (req, res) => {
     let schedules = [], presets = [], dates = [];
     for (const preset of req.body.rotation) {
       let data = await db.collection("presets").findOne({preset});
+      if (!data) return res.status(404).send("Preset "+preset+" not found.");
       delete data._id;
       presets.push(data);
     }
@@ -123,7 +124,7 @@ router.post("/autofillSchedule", async (req, res) => {
             case 3:
               period.name = "Faculty Meeting";
               period.start = "15:10:00.000";
-              period.end = "16:30:00.000";
+              period.end = "15:30:00.000";
               break;
             case 5:
               schedule.schedule.splice(i, 1);
