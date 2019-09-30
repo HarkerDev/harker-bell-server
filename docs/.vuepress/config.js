@@ -14,11 +14,11 @@ module.exports = {
       {
         title: "General",
         collapsable: false,
-        children: ["/api", "/install", "/assistant", "/features"]
+        children: ["/api", "/install", "/assistant", "/shortcuts", "/features"]
       },
       {
         title: "Internal",
-        children: ["/internal/admin", "/internal/lunchmenu", "internal/dbschema"]
+        children: ["/internal/admin", "/internal/lunchmenu", "internal/schemas"]
       }
     ],
     sidebarDepth: 2,
