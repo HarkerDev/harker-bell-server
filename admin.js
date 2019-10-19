@@ -246,6 +246,60 @@ router.post("/editSchedule", async (req, res) => {
   }
 });
 /**
+ * Edits the schedule for a certain day using a preset.
+ * @param {string} access_token access token required for authentication
+ * @param {string} date         ISO string representing the date of the schedule to edit, at UTC midnight
+ * @param {string} preset       name of the schedule preset that should be used
+ */
+router.post("/addFromPreset", async (req, res) => {
+  try {
+    const auth = await ensureAuth(req.body.access_token, "singleWrite");
+    if (!auth) return res.status(401).send("Unauthorized access.");
+    let preset = await db.collection("presets").findOne({preset: req.body.preset});
+    if (!preset) return res.status(404).send("Preset "+req.body.preset+" not found.");
+    delete preset._id;
+    let date = new Date(req.body.date);
+    preset.date = date;
+    for (let i = preset.schedule.length-1; i >= 0; i--) {
+      let period = preset.schedule[i];
+      if (period.name == "Collaboration") {
+        switch (date.getUTCDay()) {
+          case 1: case 2: case 4:
+            period.name = "Office Hours";
+            period.start = "15:10:00.000";
+            period.end = "15:30:00.000";
+            break;
+          case 3:
+            period.name = "Faculty Meeting";
+            period.start = "15:10:00.000";
+            period.end = "15:30:00.000";
+            break;
+          case 5:
+            preset.schedule.splice(i, 1);
+            continue;
+        }
+      }
+      period.start = new Date(date.toISOString().substr(0, 11)+period.start+"Z");
+      period.end = new Date(date.toISOString().substr(0, 11)+period.end+"Z");
+    }
+    const session = client.startSession();
+    await session.withTransaction(async () => {
+      await db.collection("schedules").updateOne({date}, {
+        $set: preset,
+        $setOnInsert: {
+          lunch: [],
+          events: [],
+        }
+      }, {upsert: true});
+      await createNewRevision(auth.name, [date], [await db.collection("schedules").findOne({date})]);
+    });
+    return res.send("Success.");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send(err);
+  }
+});
+/**
  * Adds additional events to the list of events for a certain day. Removes existing events if so desired.
  * @param {string} access_token access token required for authentication
  * @param {string} date         date to which the events should be added, in ISO format
