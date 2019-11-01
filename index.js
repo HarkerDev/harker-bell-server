@@ -20,7 +20,7 @@ mongodb.connect().then(db => {
   app.use("/admin", require("./admin"));
 
   app.get("/", (req, res) => {
-    res.send("You shouldn't be here. -_-");
+    res.send("You shouldn't be here... -_-");
   });
   /** Responds with the bell schedule when a request from Actions on Google/Google Assistant is received. */
   app.post("/assistant", async (req, res) => {
