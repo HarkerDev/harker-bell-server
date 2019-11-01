@@ -128,7 +128,7 @@ Returns a list of events for a given date.
 ```
 
 ### Event Categories
-Possible categories (and its associated color on the bell schedule):
+Possible categories (and their corresponding color on the bell schedule):
 Category | Identifier | Color
 -------- | ---------- | -----
 Schoolwide | `schoolwide` | Red
