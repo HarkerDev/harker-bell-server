@@ -8,7 +8,6 @@ var db;
 var client;
 async function connect() {
   try {
-    console.log(process.env.DB_HOST);
     client = await MongoClient.connect(process.env.DB_HOST);
     db = client.db(process.env.DB_NAME);
   } catch (err) {
