@@ -7,15 +7,6 @@ async function connect(server) {
     io = socket(server, {
       pingTimeout: 10000, // consider increasing pingTimeout
       pingInterval: 10000,
-      origins: [
-        "bell.harker.org:443",
-        "bell.harker.org:80",
-        "harker-bell.netlify.com:443",
-        "harker-bell.netlify.com:80",
-        "localhost:8080",
-        "localhost:8081",
-        "192.168.1.209:8080",
-      ]
     });
   } catch (err) {
     throw err;
