@@ -24,5 +24,8 @@ module.exports = {
     sidebarDepth: 2,
     searchPlaceholder: "Search...",
   },
-  plugins: ["@vuepress/back-to-top"],
+  plugins: [
+    "@vuepress/back-to-top",
+    ["@vuepress/google-analytics", {ga: "UA-136862177-1"}]
+  ],
 };
