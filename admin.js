@@ -68,28 +68,29 @@ router.post("/editMessage", async (req, res) => {
   }
 });
 /**
- * Inserts a schedule preset into the database.
+ * Inserts a schedule preset into the database. If a preset with the name already exists, it will be overriden.
  * @param {string} access_token access token required for authentication
- * @param {preset} preset       the preset to be added (must satisfy the database schema)
+ * @param {preset} preset       the preset to be edited (must satisfy the database schema)
  */
 router.post("/addPreset", async (req, res) => {
   try {
     const auth = await ensureAuth(req.body.access_token, "singleWrite");
     if (!auth) return res.status(401).send("Unauthorized access.");
-    await db.collection("presets").insertOne(req.body.preset);
+    await db.collection("presets").updateOne({preset: req.body.preset.preset}, {
+      $set: req.body.preset
+    }, {upsert: true});
   } catch (err) {
     console.error(err);
     return res.status(500).send(err);
   }
 });
 /**
- * Inserts a schedule preset into the database.
+ * Gets all schedule presets from the database.
  * @param {string} access_token access token required for authentication
- * @param {preset} preset       the preset to be added (must satisfy the database schema)
  */
 router.post("/getAllPresets", cors(), async (req, res) => {
   try {
-    const auth = await ensureAuth(req.body.access_token, "singleWrite");
+    const auth = await ensureAuth(req.body.access_token, "read");
     if (!auth) return res.status(401).send("Unauthorized access.");
     const data = await db.collection("presets").find().toArray();
     return res.send(data);

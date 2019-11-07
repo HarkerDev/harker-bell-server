@@ -254,6 +254,7 @@ This page is meant for internal use only.
         uniqueItems: true,
         items: {
           'enum': [
+            'read',
             'singleWrite',
             'bulkWrite',
             'editMessage'
