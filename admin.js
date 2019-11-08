@@ -76,9 +76,8 @@ router.post("/addPreset", async (req, res) => {
   try {
     const auth = await ensureAuth(req.body.access_token, "singleWrite");
     if (!auth) return res.status(401).send("Unauthorized access.");
-    await db.collection("presets").updateOne({preset: req.body.preset.preset}, {
-      $set: req.body.preset
-    }, {upsert: true});
+    await db.collection("presets").replaceOne({preset: req.body.preset.preset}, req.body.preset, {upsert: true});
+    return res.send("Success.");
   } catch (err) {
     console.error(err);
     return res.status(500).send(err);
@@ -92,7 +91,7 @@ router.post("/getAllPresets", cors(), async (req, res) => {
   try {
     const auth = await ensureAuth(req.body.access_token, "read");
     if (!auth) return res.status(401).send("Unauthorized access.");
-    const data = await db.collection("presets").find().toArray();
+    const data = await db.collection("presets").find().sort({preset: 1}).toArray();
     return res.send(data);
   } catch (err) {
     console.error(err);
