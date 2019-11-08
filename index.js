@@ -21,7 +21,7 @@ mongodb.connect().then(db => {
 
   app.get("/", (req, res) => {
     console.log("Log");
-    res.send("You shouldn't be here... -_-");
+    res.send("You found a secret page! Come work with us at dev.harker.org/join.");
   });
   /** Responds with the bell schedule when a request from Actions on Google/Google Assistant is received. */
   app.post("/assistant", async (req, res) => {

@@ -1,7 +1,10 @@
-const express = require("express")
+const express = require("express");
+const cors = require("cors");
 const router = express.Router();
 const db = require("./db").get();
 const socket = require("./socket");
+
+router.use(cors());
 
 // NOTE: All public APIs can be used by providing URL encoded or JSON request bodies.
 
@@ -69,7 +72,7 @@ router.get("/events", async (req, res) => {
 /**
  * Gets the number of currently connected clients.
  */
-router.get("/clients", (req, res) => {
+router.get("/clients", cors(), (req, res) => {
   return res.send(socket.get().engine.clientsCount.toString());
 });
 /**
