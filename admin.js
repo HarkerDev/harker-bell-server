@@ -236,14 +236,39 @@ router.post("/editSchedule", async (req, res) => {
     const date = new Date(schedule.date);
     if (schedule.schedule)
       for (const period of schedule.schedule) {
-        if (period.start) period.start = new Date(period.start);
-        if (period.end) period.end = new Date(period.end);
+        if (period.name == "Collaboration") {
+          switch (date.getUTCDay()) {
+            case 1: case 2: case 4:
+              period.name = "Office Hours";
+              period.start = "15:10:00.000";
+              period.end = "15:30:00.000";
+              break;
+            case 3:
+              period.name = "Faculty Meeting";
+              period.start = "15:10:00.000";
+              period.end = "15:30:00.000";
+              break;
+            case 5:
+              preset.schedule.splice(i, 1);
+              continue;
+          }
+        }
+        if (period.start) {
+          if (period.start.length <= 12) // if no date part is included
+            period.start = new Date(date.toISOString().substr(0, 11)+period.start+"Z");
+          else period.start = new Date(period.start);
+        }
+        if (period.end) {
+          if (period.end.length <= 12)
+            period.end = new Date(date.toISOString().substr(0, 11)+period.end+"Z");
+          else period.end = new Date(period.end);
+        }
       }
     const session = client.startSession();
     await session.withTransaction(async () => {
       await db.collection("schedules").updateOne({date}, {
         $set: {
-          ...(schedule.schedule && {schedule: schedule.schedule}),
+          ...(schedule.schedule && {schedule: schedule.schedule}), // conditionally add key to object
           ...(schedule.preset && {preset: schedule.preset}),
           ...(schedule.code && {code: schedule.code}),
           ...(schedule.variant && {variant: schedule.variant}),
