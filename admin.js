@@ -48,6 +48,21 @@ async function createNewRevision(name, changes, schedules) {
   io.emit("update schedule", schedules, result.insertedId);
 }
 /**
+ * Retrives the live message displayed on all connected bell schedule clients.
+ * @param {string} access_token access token required for authentication
+ */
+router.post("/getMessage", async (req, res) => {
+  try {
+    const auth = await ensureAuth(req.body.access_token, "read");
+    if (!auth) return res.status(400).send("Unauthorized access.");
+    const data = await db.collection("misc").findOne({type: "message"});
+    return res.send(data.message);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send(err);
+  }
+});
+/**
  * Updates the live message displayed on all connected bell schedule clients.
  * @param {string} access_token access token required for authentication
  * @param {string} message      the new message that should be set
