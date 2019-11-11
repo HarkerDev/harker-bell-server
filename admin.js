@@ -269,7 +269,7 @@ router.post("/editSchedule", async (req, res) => {
               period.end = "15:30:00.000";
               break;
             case 5:
-              preset.schedule.splice(i, 1);
+              schedule.schedule.splice(i, 1);
               continue;
           }
         }
