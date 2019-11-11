@@ -72,7 +72,7 @@ router.get("/events", async (req, res) => {
 /**
  * Gets the number of currently connected clients.
  */
-router.get("/clients", cors(), (req, res) => {
+router.get("/clients", (req, res) => {
   return res.send(socket.get().engine.clientsCount.toString());
 });
 /**
