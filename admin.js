@@ -7,6 +7,7 @@ const db = mongodb.get();
 const socket = require("./socket");
 const parse = require("csv-parse/lib/sync");
 
+router.use(cors());
 /** For text/* content type. Used in generateLunch. */
 router.use((req, res, next) => {
   if (req.is("text/*")) {
@@ -55,7 +56,7 @@ async function createNewRevision(name, changes, schedules) {
  * Retrives the live message displayed on all connected bell schedule clients.
  * @param {string} access_token access token required for authentication
  */
-router.post("/getMessage", cors(), async (req, res) => {
+router.post("/getMessage", async (req, res) => {
   try {
     const auth = await ensureAuth(req.body.access_token, "read");
     if (!auth) return res.status(401).send("Unauthorized access.");
@@ -106,7 +107,7 @@ router.post("/addPreset", async (req, res) => {
  * Gets all schedule presets from the database.
  * @param {string} access_token access token required for authentication
  */
-router.post("/getAllPresets", cors(), async (req, res) => {
+router.post("/getAllPresets", async (req, res) => {
   try {
     const auth = await ensureAuth(req.body.access_token, "read");
     if (!auth) return res.status(401).send("Unauthorized access.");
