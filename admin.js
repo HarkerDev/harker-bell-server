@@ -255,7 +255,8 @@ router.post("/editSchedule", async (req, res) => {
     const schedule = req.body.schedule;
     const date = new Date(schedule.date);
     if (schedule.schedule)
-      for (const period of schedule.schedule) {
+      for (let i = schedule.schedule.length-1; i >= 0; i--) {
+        let period = schedule.schedule[i];
         if (period.name == "Collaboration") {
           switch (date.getUTCDay()) {
             case 1: case 2: case 4:
