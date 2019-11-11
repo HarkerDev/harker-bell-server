@@ -215,6 +215,14 @@ This page is meant for internal use only.
         },
         additionalItems: false
       },
+      documents: {
+        bsonType: 'array',
+        description: 'array of documents that were changed, containing the updated schedules',
+        items: {
+          bsonType: 'object'
+        },
+        additionalItems: false
+      },
       name: {
         bsonType: 'string',
         description: 'name of the user who authored this revision'

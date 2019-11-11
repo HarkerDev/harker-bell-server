@@ -32,15 +32,20 @@ async function ensureAuth(access_token, permission) {
   return false;
 }
 /**
- * Saves a new revision and pushes  schedule changes to all connected clients.
+ * Saves a new revision and pushes schedule changes to all connected clients.
  * @param {string} name         name of the author of the revision
  * @param {Date[]} changes      array of dates for each schedule that was modified
  * @param {Object[]} schedules  array of schedules
  */
 async function createNewRevision(name, changes, schedules) {
+  let documents = await db.collection("schedules").find({
+    date: {$in: changes}
+  });
+  documents = await documents.toArray();
   let result = await db.collection("revisions").insertOne({
     timestamp: new Date(),
     changes,
+    documents,
     name,
   });
   const io = socket.get();
