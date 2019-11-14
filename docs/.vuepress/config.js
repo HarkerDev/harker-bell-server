@@ -14,15 +14,16 @@ module.exports = {
       {
         title: "General",
         collapsable: false,
-        children: ["/api", "/install", "/assistant", "/shortcuts", "/features"]
+        children: ["/api", "/install", "/assistant", "/shortcuts", "/features", "/issues"]
       },
       {
         title: "Internal",
-        children: ["/internal/admin", "/internal/lunchmenu", "internal/schemas"]
+        children: ["/internal/admin", "/internal/lunchmenu", "/internal/schemas"]
       }
     ],
     sidebarDepth: 2,
-    searchPlaceholder: "Search...",
+    searchPlaceholder: "Search",
+    smoothScroll: true,
   },
   plugins: [
     "@vuepress/back-to-top",

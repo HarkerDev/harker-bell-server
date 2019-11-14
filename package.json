@@ -1,7 +1,7 @@
 {
   "name": "harker-bell-server",
   "version": "1.0.0",
-  "description": "Server exposing public API and push notifications for Harker Bell Schedule.",
+  "description": "Server exposing public API and websocket for Harker Bell Schedule.",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
@@ -32,6 +32,6 @@
   "devDependencies": {
     "@vuepress/plugin-google-analytics": "^1.2.0",
     "nodemon": "^1.18.11",
-    "vuepress": "^1.0.3"
+    "vuepress": "^1.2.0"
   }
 }

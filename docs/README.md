@@ -1,5 +1,5 @@
 # Welcome
-Welcome to the documentation website for the [Harker Bell Schedule](https://bell.harker.org)! Here you'll find guides about using our [public API](api.html), [Google Assistant service](assistant.html), and [much more](features.html).
+Welcome to the documentation website for the [Harker Bell Schedule](https://bell.harker.org). Here you'll find guides about using our [public API](api.html), [Google Assistant service](assistant.html), and [much more](features.html).
 
 
 ## Supported Browsers
@@ -30,3 +30,7 @@ Microsoft Edge | 17+
 Opera | 32+
 Samsung Internet | Supported
 Internet Explorer | Not supported
+
+<a href="https://www.netlify.com" target="_blank">
+  <img src="https://www.netlify.com/img/global/badges/netlify-light.svg"/>
+</a>
