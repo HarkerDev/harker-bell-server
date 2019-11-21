@@ -276,4 +276,4 @@ This page is meant for internal use only.
 ```
 
 ### Collection `harker-bell/misc`
-No schema available.
+No schema.

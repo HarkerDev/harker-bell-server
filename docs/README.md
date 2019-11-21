@@ -1,5 +1,5 @@
 # Welcome
-Welcome to the documentation website for the [Harker Bell Schedule](https://bell.harker.org). Here you'll find guides about using our [public API](api.html), [Google Assistant service](assistant.html), and [much more](features.html).
+Welcome to the documentation website for the [Harker Bell Schedule](https://bell.harker.org). Here you'll find guides about using our [public API](api.html), [Google Assistant service](assistant.html), and more.
 
 
 ## Supported Browsers
