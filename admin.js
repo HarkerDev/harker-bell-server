@@ -452,7 +452,7 @@ router.get("/generateLunch", (req, res) => {
   for (const row of data)
     for (const [header, value] of Object.entries(row))
       if (menus[header] && value) {
-        if (value == value.toUpperCase() && !value.includes("CLOSED") && !value.includes("BBQ"))
+        if (value == value.toUpperCase() && value != "BBQ" && !value.includes("CLOSED"))
           menus[header].push({place: properCase(value), food: ""});
         else {
           const lastItem = menus[header][menus[header].length-1];
