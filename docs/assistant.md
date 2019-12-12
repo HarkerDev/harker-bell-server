@@ -1,6 +1,6 @@
 # Google Assistant
 
-There's an even easier way to access the bell schedule and lunch menu—using the Google Assistant. This works on any device with Google Assistant enabled, including Android phones, Apple phones (with the Google Assistant app), and select smart speakers. Try it out now!
+There's an even easier way to access the bell schedule and lunch menu—using Google Assistant. This works on any device with Google Assistant enabled, including Android phones, Apple phones (with the [Google Assistant app](https://itunes.apple.com/us/app/google-assistant/id1220976145)), and select smart speakers. Try it out now!
 
 ## Getting the bell schedule
 

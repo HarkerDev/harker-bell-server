@@ -128,19 +128,19 @@ Returns a list of events for a given date.
 ```
 
 ### Event Categories
-Possible categories (and their corresponding color on the bell schedule):
+Possible categories (and their corresponding color on the bell schedule app):
 Category | Identifier | Color
 -------- | ---------- | -----
-Schoolwide | `schoolwide` | Red
-Academics | `academics` | Orange
-Important Events | `important` | Yellow
-Athletics & Spirit | `athspirit` | Green
-Other Departments/Extracurriculars | `extra` | Teal
-Performing Arts | `perfarts` | Blue
-Clubs | `clubs` | Purple
-Special Events | `special` | Pink
-Schedule Info | `info` | Gray
-Other | `other` | Brown
+Schoolwide | `schoolwide` | ![#EA4335](https://placehold.it/10/EA4335?text=+)&nbsp; Red
+Academics | `academics` | ![#FA7B17](https://placehold.it/10/FA7B17?text=+)&nbsp; Orange
+Important Events | `important` | ![#FBBC04](https://placehold.it/10/FBBC04?text=+)&nbsp; Yellow
+Athletics & Spirit | `athspirit` | ![#0F9D58](https://placehold.it/10/0F9D58?text=+)&nbsp; Green
+Other Departments/Extracurriculars | `extra` | ![#00C3A6](https://placehold.it/10/00C3A6?text=+)&nbsp; Teal
+Performing Arts | `perfarts` | ![#1A73E8](https://placehold.it/10/1A73E8?text=+)&nbsp; Blue
+Clubs | `clubs` | ![#A142F4](https://placehold.it/10/A142F4?text=+)&nbsp; Purple
+Special Events | `special` | ![#F538A0](https://placehold.it/10/CF2035?text=+)&nbsp; Pink
+Schedule Info | `info` | ![#9AA0A6](https://placehold.it/10/9AA0A6?text=+)&nbsp; Gray
+Other | `other` | ![#795548](https://placehold.it/10/795548?text=+)&nbsp; Brown
 
 #### Example Request
 ```bash
