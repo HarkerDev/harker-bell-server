@@ -26,7 +26,8 @@ mongodb.connect().then(db => {
   app.post("/assistant", async (req, res) => {
     let date = new Date(req.body.queryResult.parameters.date.substring(0, 10));
     const now = new Date();
-    console.log(now.toLocaleString()+":\t Assistant invoked "+date.toISOString());
+    console.log(now.toJSON()+":\t Assistant invoked "+date.toISOString());
+    console.log(req.headers["user-agent"]);
     let formattedDate = date.toLocaleDateString(undefined, {
       timeZone: "UTC",
       weekday: "short",
@@ -69,7 +70,8 @@ mongodb.connect().then(db => {
         sentry.captureException(err);
       });
       socket.on("request schedule", async (data, callback) => {
-        console.log(new Date().toLocaleString()+":\t"+socket.id+" requested schedule "+data);
+        console.log(new Date().toJSON()+":\t"+socket.id+" requested schedule "+JSON.stringify(data));
+        console.log(socket.request.headers["user-agent"]);
         let schedules = await db.collection("schedules").find({
           date: {
             $gte: new Date(data.start),

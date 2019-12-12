@@ -15,7 +15,7 @@ router.use(cors());
  * @param {number} year   4-digit year
  */
 router.get("/schedule", async (req, res) => {
-  console.log(new Date().toLocaleString()+":\t GET /api/schedule"+req.body);
+  console.log(new Date().toJSON()+":\t GET /api/schedule "+JSON.stringify(req.body));
   console.log(req.headers["user-agent"]);
   try {
     let data = await db.collection("schedules").findOne({
@@ -38,7 +38,7 @@ router.get("/schedule", async (req, res) => {
  * @param {number} year   4-digit year
  */
 router.get("/lunchmenu", async (req, res) => {
-  console.log(new Date().toLocaleString()+":\t GET /api/lunchmenu"+req.body);
+  console.log(new Date().toJSON()+":\t GET /api/lunchmenu "+JSON.stringify(req.body));
   console.log(req.headers["user-agent"]);
   try {
     let data = await db.collection("schedules").findOne({
@@ -60,7 +60,7 @@ router.get("/lunchmenu", async (req, res) => {
  * @param {number} year   4-digit year
  */
 router.get("/events", async (req, res) => {
-  console.log(new Date().toLocaleString()+":\t GET /api/events"+req.body);
+  console.log(new Date().toJSON()+":\t GET /api/events "+JSON.stringify(req.body));
   console.log(req.headers["user-agent"]);
   try {
     let data = await db.collection("schedules").findOne({
@@ -79,8 +79,6 @@ router.get("/events", async (req, res) => {
  * Gets the number of currently connected clients.
  */
 router.get("/clients", (req, res) => {
-  console.log(new Date().toLocaleString()+":\t GET /api/clients"+req.body);
-  console.log(req.headers["user-agent"]);
   return res.send(socket.get().engine.clientsCount.toString());
 });
 /**

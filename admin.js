@@ -57,7 +57,7 @@ async function createNewRevision(name, changes, schedules) {
  * @param {string} access_token access token required for authentication
  */
 router.post("/getMessage", async (req, res) => {
-  console.log(new Date().toLocaleString()+":\t POST /admin/getMessage");
+  console.log(new Date().toJSON()+":\t POST /admin/getMessage "+JSON.stringify(req.body));
   console.log(req.headers["user-agent"]);
   try {
     const auth = await ensureAuth(req.body.access_token, "read");
@@ -75,7 +75,7 @@ router.post("/getMessage", async (req, res) => {
  * @param {string} message      the new message that should be set
  */
 router.post("/editMessage", async (req, res) => {
-  console.log(new Date().toLocaleString()+":\t POST /admin/editMessage");
+  console.log(new Date().toJSON()+":\t POST /admin/editMessage "+JSON.stringify(req.body));
   console.log(req.headers["user-agent"]);
   try {
     const auth = await ensureAuth(req.body.access_token, "editMessage");
@@ -97,7 +97,7 @@ router.post("/editMessage", async (req, res) => {
  * @param {preset} preset       the preset to be edited (must satisfy the database schema)
  */
 router.post("/addPreset", async (req, res) => {
-  console.log(new Date().toLocaleString()+":\t POST /admin/addPreset");
+  console.log(new Date().toJSON()+":\t POST /admin/addPreset "+JSON.stringify(req.body));
   console.log(req.headers["user-agent"]);
   try {
     const auth = await ensureAuth(req.body.access_token, "singleWrite");
@@ -114,7 +114,7 @@ router.post("/addPreset", async (req, res) => {
  * @param {string} access_token access token required for authentication
  */
 router.post("/getAllPresets", async (req, res) => {
-  console.log(new Date().toLocaleString()+":\t POST /admin/getAllPresets");
+  console.log(new Date().toJSON()+":\t POST /admin/getAllPresets "+JSON.stringify(req.body));
   console.log(req.headers["user-agent"]);
   try {
     const auth = await ensureAuth(req.body.access_token, "read");
@@ -139,7 +139,7 @@ router.post("/getAllPresets", async (req, res) => {
  *                              potentially destructive action. add the current date in ISO format as a check.
  */
 router.post("/autofillSchedule", async (req, res) => {
-  console.log(new Date().toLocaleString()+":\t POST /admin/autofillSchedule");
+  console.log(new Date().toJSON()+":\t POST /admin/autofillSchedule "+JSON.stringify(req.body));
   console.log(req.headers["user-agent"]);
   try {
     const auth = await ensureAuth(req.body.access_token, "bulkWrite");
@@ -215,7 +215,7 @@ router.post("/autofillSchedule", async (req, res) => {
  * @param {string} name         name of the holiday or break
  */
 router.post("/addHolidays", async (req, res) => {
-  console.log(new Date().toLocaleString()+":\t POST /admin/addHolidays");
+  console.log(new Date().toJSON()+":\t POST /admin/addHolidays "+JSON.stringify(req.body));
   console.log(req.headers["user-agent"]);
   try {
     const auth = await ensureAuth(req.body.access_token, "bulkWrite");
@@ -261,7 +261,7 @@ router.post("/addHolidays", async (req, res) => {
  * @param {Object} schedule     the new schedule (lunch and events will NOT be modified)
  */
 router.post("/editSchedule", async (req, res) => {
-  console.log(new Date().toLocaleString()+":\t POST /admin/editSchedule");
+  console.log(new Date().toJSON()+":\t POST /admin/editSchedule "+JSON.stringify(req.body));
   console.log(req.headers["user-agent"]);
   try {
     const auth = await ensureAuth(req.body.access_token, "singleWrite");
@@ -330,7 +330,7 @@ router.post("/editSchedule", async (req, res) => {
  * @param {string} preset       name of the schedule preset that should be used
  */
 router.post("/addFromPreset", async (req, res) => {
-  console.log(new Date().toLocaleString()+":\t POST /admin/addFromPreset");
+  console.log(new Date().toJSON()+":\t POST /admin/addFromPreset "+JSON.stringify(req.body));
   console.log(req.headers["user-agent"]);
   try {
     const auth = await ensureAuth(req.body.access_token, "singleWrite");
@@ -387,7 +387,7 @@ router.post("/addFromPreset", async (req, res) => {
  * @param {boolean} clear_all   whether or not all existing events should be removed before adding new ones
  */
 router.post("/addEvents", async (req, res) => {
-  console.log(new Date().toLocaleString()+":\t POST /admin/addEvents");
+  console.log(new Date().toJSON()+":\t POST /admin/addEvents "+JSON.stringify(req.body));
   console.log(req.headers["user-agent"]);
   try {
     const auth = await ensureAuth(req.body.access_token, "singleWrite");
@@ -426,7 +426,7 @@ router.post("/addEvents", async (req, res) => {
  * @param {boolean} clear_all   whether or not all existing menu items should be removed before adding new ones
  */
 router.post("/addLunch", async (req, res) => {
-  console.log(new Date().toLocaleString()+":\t POST /admin/addLunch");
+  console.log(new Date().toJSON()+":\t POST /admin/addLunch");
   console.log(req.headers["user-agent"]);
   try {
     const auth = await ensureAuth(req.body.access_token, "singleWrite");
@@ -463,7 +463,7 @@ router.post("/addLunch", async (req, res) => {
  * @param {string} end    end date of the lunch menu CSV
  */
 router.get("/generateLunch", (req, res) => {
-  console.log(new Date().toLocaleString()+":\t GET /admin/generateLunch");
+  console.log(new Date().toJSON()+":\t GET /admin/generateLunch");
   console.log(req.headers["user-agent"]);
   const data = parse(req.text, {
     columns: true,
