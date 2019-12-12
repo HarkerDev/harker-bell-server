@@ -10,12 +10,12 @@ sentry.init({
   dsn: process.env.SENTRY,
   release: "harker-bell-server@"+require("./package.json").version,
 });
-console.log("STARTING");
+console.log("Starting...");
 app.use(sentry.Handlers.requestHandler());
 app.use(express.json()); // use new built-in Express middleware
 app.use(express.urlencoded());
 mongodb.connect().then(db => {
-  console.log("CONNECTED");
+  console.log("Connected to DB.");
   app.use("/api", require("./api"));
   app.use("/admin", require("./admin"));
 
@@ -26,6 +26,7 @@ mongodb.connect().then(db => {
   app.post("/assistant", async (req, res) => {
     let date = new Date(req.body.queryResult.parameters.date.substring(0, 10));
     const now = new Date();
+    console.log(now.toLocaleString()+":\t Assistant invoked "+date.toISOString());
     let formattedDate = date.toLocaleDateString(undefined, {
       timeZone: "UTC",
       weekday: "short",
@@ -54,20 +55,21 @@ mongodb.connect().then(db => {
   });
   app.use(sentry.Handlers.errorHandler());
   const server = app.listen(process.env.PORT, () => {
-    console.log("server is running on port "+process.env.PORT);
+    console.log("Server running on port "+process.env.PORT);
   });
   
   socketio.connect(server).then(io => {
     io.on("connection", async socket => {
-      console.log("connected "+socket.id);
-      socket.on("disconnect", err => {
-        console.log("disconnected "+socket.id);
-      });
+      /*console.log(new Date().toLocaleString()+":\t"+socket.id+" connected");
+      socket.on("disconnect", () => {
+        console.log(new Date().toLocaleString()+":\t"+socket.id+" disconnected");
+      });*/
       socket.on("error", err => {
         console.error(err);
+        sentry.captureException(err);
       });
       socket.on("request schedule", async (data, callback) => {
-        console.log(data);
+        console.log(new Date().toLocaleString()+":\t"+socket.id+" requested schedule "+data);
         let schedules = await db.collection("schedules").find({
           date: {
             $gte: new Date(data.start),
@@ -88,7 +90,6 @@ mongodb.connect().then(db => {
               changes.add(date.getTime());
           let schedules = [];
           for (const date of changes) {
-            console.log(date);
             let schedule = await db.collection("schedules").findOne({date: new Date(date)});
             if (schedule) schedules.push(schedule);
           }
