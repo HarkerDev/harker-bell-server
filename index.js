@@ -26,8 +26,6 @@ mongodb.connect().then(db => {
   app.post("/assistant", async (req, res) => {
     let date = new Date(req.body.queryResult.parameters.date.substring(0, 10));
     const now = new Date();
-    console.log(now.toJSON()+":\t Assistant invoked "+date.toISOString());
-    console.log(req.headers["user-agent"]);
     let formattedDate = date.toLocaleDateString(undefined, {
       timeZone: "UTC",
       weekday: "short",
