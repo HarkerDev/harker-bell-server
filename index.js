@@ -31,13 +31,13 @@ mongodb.connect().then(db => {
       // Get bell schedule
       case "projects/harker-dev/agent/intents/37afe580-ee5c-4876-84b2-5744bbfa71bb":
       case "projects/harker-dev/agent/intents/ad05a529-e493-41af-8512-dba54e2c5230":
-        return res.send(handleScheduleRequest(query, db));
+        return res.send(await handleScheduleRequest(query, db));
       // Get next period
       case "projects/harker-dev/agent/intents/8934297d-8426-4b0c-9114-6c38e727d6ab":
-        return res.send(handlePeriodRequest(query, db));
+        return res.send(await handlePeriodRequest(query, db));
       // Get lunch menu
       case "projects/harker-dev/agent/intents/b60bd193-494d-4567-905d-86354cc60733":
-        return res.send(handleLunchRequest(query, db));
+        return res.send(await handleLunchRequest(query, db));
     }
     let date = new Date(query.parameters.date.substring(0, 10));
     const now = new Date();
