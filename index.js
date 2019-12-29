@@ -26,6 +26,7 @@ mongodb.connect().then(db => {
   /** Responds with the bell schedule when a request from Actions on Google/Google Assistant is received. */
   app.post("/assistant", async (req, res) => {
     const query = req.body.queryResult;
+    if (!query.intent) return res.status(400);
     switch (query.intent.name) {
       // Get bell schedule
       case "projects/harker-dev/agent/intents/37afe580-ee5c-4876-84b2-5744bbfa71bb":
