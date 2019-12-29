@@ -1,10 +1,11 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
-const {ObjectId} = require("mongodb");
+const MongoDB = require("mongodb");
 const mongodb = require("./db");
 const socketio = require("./socket");
 const sentry = require("@sentry/node");
+const moment = require("moment");
 
 sentry.init({
   dsn: process.env.SENTRY,
@@ -24,7 +25,20 @@ mongodb.connect().then(db => {
   });
   /** Responds with the bell schedule when a request from Actions on Google/Google Assistant is received. */
   app.post("/assistant", async (req, res) => {
-    let date = new Date(req.body.queryResult.parameters.date.substring(0, 10));
+    const query = req.body.queryResult;
+    switch (query.intent.name) {
+      // Get bell schedule
+      case "projects/harker-dev/agent/intents/37afe580-ee5c-4876-84b2-5744bbfa71bb":
+      case "projects/harker-dev/agent/intents/ad05a529-e493-41af-8512-dba54e2c5230":
+        return res.send(handleScheduleRequest(query, db));
+      // Get next period
+      case "projects/harker-dev/agent/intents/8934297d-8426-4b0c-9114-6c38e727d6ab":
+        return res.send(handlePeriodRequest(query, db));
+      // Get lunch menu
+      case "projects/harker-dev/agent/intents/b60bd193-494d-4567-905d-86354cc60733":
+        return res.send(handleLunchRequest(query, db));
+    }
+    let date = new Date(query.parameters.date.substring(0, 10));
     const now = new Date();
     let formattedDate = date.toLocaleDateString(undefined, {
       timeZone: "UTC",
@@ -51,7 +65,9 @@ mongodb.connect().then(db => {
     res.send({
       fulfillment_text: str,
     });
+    return res.status(404).send("Action not found.");
   });
+  
   app.use(sentry.Handlers.errorHandler());
   const server = app.listen(process.env.PORT, () => {
     console.log("Server running on port "+process.env.PORT);
@@ -81,7 +97,7 @@ mongodb.connect().then(db => {
       socket.on("request update", async revision => {
         if (revision) {
           let revisions = await db.collection("revisions").find({_id: {
-            $gt: new ObjectId(revision)
+            $gt: new MongoDB.ObjectId(revision)
           }});
           revisions = await revisions.toArray();
           let changes = new Set();
@@ -109,10 +125,89 @@ mongodb.connect().then(db => {
   throw err;
 });
 
+// Options for relative dates using Moment
+const relDateOptions = {
+  sameDay: "[Today]",
+  nextDay: "[Tomorrow]",
+  nextWeek: "dddd",
+  lastDay: "[Yesterday]",
+  lastWeek: "[Last] dddd",
+  sameElse: "MMM D, YYYY"
+};
 /**
- * 
+ * Determines if the given string starts with a vowel.
  * @param {string} str  the string to test
  */
 function startsWithVowel(str) {
   return ["a", "e", "i", "o", "u"].includes(str.toLowerCase().substring(0, 1));
+}
+/**
+ * Determines if a given date is in the past.
+ * @param {Date} date the date to check
+ */
+function isDateInPast(date) {
+  const now = new Date();
+  return now-date >= (now.getTimezoneOffset()+24*60)*60*1000;
+}
+/**
+ * 
+ * @param {Object} query  the query object
+ * @param {MongoDB.Db} db reference to the database
+ */
+async function handleScheduleRequest(query, db) {
+  const date = new Date(query.parameters.date.substring(0, 10) || new Date());
+  const momentDate = moment(query.parameters.date);
+  const relDate = momentDate.calendar(undefined, relDateOptions);
+  const schedule = await db.collection("schedules").findOne({date});
+  let result = "<speak>"+relDate;
+  if (schedule) {
+    result += (momentDate.isBefore(undefined, "day") ? " was " : " is ");
+    if (schedule.variant) {
+      result += startsWithVowel(schedule.variant) ? "an " : "a ";
+      result += schedule.variant+' ';
+    } else
+      result += startsWithVowel(schedule.code) ? "an " : "a ";
+    result += `<say-as interpret-as="spell-out">${schedule.code}</say-as> day.</speak>`;
+  } else {
+    result = `Sorry, I couldn't find a schedule for ${relDate}.`;
+  }
+  return {
+    fulfillment_text: result,
+  };
+}
+/**
+ * 
+ * @param {Object} query  the query object
+ * @param {MongoDB.Db} db reference to the database
+ */
+async function handlePeriodRequest(query, db) {
+  const now = new Date();
+  let date = new Date(now-(now.getTimezoneOffset()*60*1000));
+  let result = "";
+  while (!result.length) {
+    let schedule = await db.collection("schedules").findOne({date: {$gte: date}});
+    for (const period of schedule.schedule) {
+      if (new Date(period.start) > date && /(^P[1-9]$)|Assembly|Advisory|Advisee|Meeting/.test(period.name)) {
+        let momentDate = moment(now);
+        if (momentDate.isAfter(undefined, "day")) {
+          const relDate = momentDate.calendar(undefined, relDateOptions);
+          result += `<speak>${period.name} starts ${relDate} at <say-as interpret-as="time">${period.start.substring(11, 16)}</say-as>.</speak>`;
+        } else
+          result += `<speak>${period.name} starts at <say-as interpret-as="time">${period.start.substring(11, 16)}</say-as>.</speak>`;
+        break;
+      }
+    }
+    date = new Date(+date + 24*60*60*1000);
+  }
+  return {
+    fulfillment_text: result,
+  }
+}
+/**
+ * 
+ * @param {Object} query  the query object
+ * @param {MongoDB.Db} db reference to the database
+ */
+async function handleLunchRequest(query, db) {
+  
 }
