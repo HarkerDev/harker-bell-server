@@ -126,14 +126,6 @@ function startsWithVowel(str) {
   return ["a", "e", "i", "o", "u"].includes(str.toLowerCase().substring(0, 1));
 }
 /**
- * Determines if a given date is in the past.
- * @param {Date} date the date to check
- */
-function isDateInPast(date) {
-  const now = new Date();
-  return now-date >= (now.getTimezoneOffset()+24*60)*60*1000;
-}
-/**
  * 
  * @param {Object} query  the query object
  * @param {MongoDB.Db} db reference to the database
@@ -245,21 +237,28 @@ async function handleLunchRequest(query, db) {
       fulfillment_text: result,
     };
   }
-  let formatted_text = "";
+  let formattedText = "";
   for (const item of schedule.lunch)
-    formatted_text += `**${item.place}**: ${item.food}\n`;
+    formattedText += `**${item.place}**: ${item.food}\n`;
   return {
     fulfillment_text: result,
-    fulfillment_messages: [{
-      basic_card: {
-        title: "Lunch Menu",
-        subtitle: momentDate.format("MMM D, YYYY"),
-        formatted_text,
-        buttons: [{
-          title: "Open lunch menu",
-          open_uri_action: {uri: "https://bell.harker.org/?utm_source=glunch&utm_medium=assistant"},
-        }],
+    payload: {
+      google: {
+        expectUserResponse: false,
+        richResponse: {
+          items: [{
+            basicCard: {
+              title: "Lunch Menu",
+              subtitle: momentDate.format("MMM D, YYYY"),
+              formattedText,
+              buttons: [{
+                title: "Open lunch menu",
+                open_uri_action: {uri: "https://bell.harker.org/?utm_source=glunch&utm_medium=assistant"},
+              }],
+            }
+          }]
+        }
       }
-    }],
+    }
   };
 }
