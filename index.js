@@ -47,8 +47,7 @@ mongodb.connect().then(db => {
       }
     } catch (err) {
       sentry.captureException(err);
-      res.status(500).send("Internal error.");
-      throw err;
+      return res.status(500).send("Internal error.");
     }
     let date = new Date(query.parameters.date.substring(0, 10));
     const now = new Date();
@@ -284,7 +283,10 @@ async function handleLunchRequest(query, db) {
         subtitle: momentDate.format("MMM D, YYY"),
         column_properties: [{header: "Location"}, {header: "Menu Item"}],
         rows,
-        buttons: [{title: "Open lunch menu", open_uri_action: "https://bell.harker.org/?utm_source=glunch&utm_medium=assistant"}],
+        buttons: [{
+          title: "Open lunch menu",
+          open_uri_action: {uri: "https://bell.harker.org/?utm_source=glunch&utm_medium=assistant"},
+        }],
       }
     }],
   };
