@@ -237,24 +237,38 @@ async function handleLunchRequest(query, db) {
       fulfillment_text: result,
     };
   }
-  let formattedText = "";
+  /*let formattedText = "";
   for (const item of schedule.lunch)
-    formattedText += `**${item.place}**: ${item.food}\n`;
+    formattedText += `**${item.place}**: ${item.food}\n`;*/
+  let rows = [];
+  for (const item of schedule.lunch)
+    rows.push({cells: [{text: item.place}, {text: item.food}]});
   return {
     payload: {
       google: {
+        fulfillment_text: result,
         expectUserResponse: false,
         richResponse: {
           items: [{
-            simpleResponse: {ssml: result},
+            simpleResponse: {textToSpeech: result},
           }, {
-            basicCard: {
+            /*basicCard: {
               title: "Lunch Menu",
               subtitle: momentDate.format("MMM D, YYYY"),
               formattedText,
               buttons: [{
                 title: "Open lunch menu",
-                open_uri_action: {uri: "https://bell.harker.org/?utm_source=glunch&utm_medium=assistant"},
+                openUrlAction: {url: "https://bell.harker.org/?utm_source=glunch&utm_medium=assistant"},
+              }],
+            }*/
+            tableCard: {
+              title: "Lunch Menu",
+              subtitle: momentDate.format("MMM D, YYYY"),
+              columnProperties: [{header: "Location"}, {header: "Menu Item"}],
+              rows,
+              buttons: [{
+                title: "Open lunch menu",
+                openUrlAction: {url: "https://bell.harker.org/?utm_source=glunch&utm_medium=assistant"},
               }],
             }
           }]
