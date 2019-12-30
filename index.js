@@ -49,33 +49,6 @@ mongodb.connect().then(db => {
       sentry.captureException(err);
       return res.status(500).send("Internal error.");
     }
-    let date = new Date(query.parameters.date.substring(0, 10));
-    const now = new Date();
-    let formattedDate = date.toLocaleDateString(undefined, {
-      timeZone: "UTC",
-      weekday: "short",
-      month: "long",
-      day: "numeric",
-      year: date.getUTCFullYear() == now.getFullYear() ? undefined : "numeric",
-    });
-    let schedule = await db.collection("schedules").findOne({date});
-    let str = "";
-    if (schedule) {
-      str += formattedDate+(now-date < (now.getTimezoneOffset()+24*60)*60*1000 ? " is " : " was ");
-      if (schedule.variant) {
-        str += startsWithVowel(schedule.variant) ? "an " : "a ";
-        str += schedule.variant+' "'+schedule.code+'"';
-      } else {
-        str += startsWithVowel(schedule.code) ? "an " : "a ";
-        str += '"'+schedule.code+'"';
-      }
-      str += " schedule."
-    } else {
-      str += `Sorry, I couldn't find a schedule for ${formattedDate}.`;
-    }
-    res.send({
-      fulfillment_text: str,
-    });
     return res.status(404).send("Action not found.");
   });
   
@@ -272,17 +245,16 @@ async function handleLunchRequest(query, db) {
       fulfillment_text: result,
     };
   }
-  let rows = [];
+  let formatted_text = "";
   for (const item of schedule.lunch)
-    rows.push({cells: [{text: item.place}, {text: item.food}]});
+    formatted_text += `**${item.place}**: ${item.food}\n`;
   return {
     fulfillment_text: result,
     fulfillment_messages: [{
-      table_card: {
+      basic_card: {
         title: "Lunch Menu",
-        subtitle: momentDate.format("MMM D, YYY"),
-        column_properties: [{header: "Location"}, {header: "Menu Item"}],
-        rows,
+        subtitle: momentDate.format("MMM D, YYYY"),
+        formatted_text,
         buttons: [{
           title: "Open lunch menu",
           open_uri_action: {uri: "https://bell.harker.org/?utm_source=glunch&utm_medium=assistant"},
