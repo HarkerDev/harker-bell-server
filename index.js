@@ -223,47 +223,38 @@ async function handleLunchRequest(query, db) {
   const schedule = await db.collection("schedules").findOne({date});
   let result = "";
   if (schedule && schedule.lunch.length) {
-    for (const item of schedule.lunch) {
-      if (item.place == query.parameters.lunch_location) {
-        result += `${query.parameters.lunch_location} ${momentDate.isBefore(undefined, "day") ? "served" : "is serving"} ${item.food} for ${relDate}.`;
-        break;
+    if (!query.parameters.lunch_location)
+      result += `Here's the lunch menu for ${relDate}.`;
+    else {
+      for (const item of schedule.lunch) {
+        if (item.place == query.parameters.lunch_location) {
+          result += `${query.parameters.lunch_location} ${momentDate.isBefore(undefined, "day") ? "served" : "is serving"} ${item.food} for ${relDate}.`;
+          break;
+        }
       }
+      if (!result.length)
+        result += `${query.parameters.lunch_location} is not serving anything for ${relDate}.`;
     }
-    if (!result.length)
-      result += `${query.parameters.lunch_location} is not serving anything for ${relDate}.`;
   } else {
     result = `Sorry, there's no lunch menu for ${relDate}.`;
     return {
       fulfillment_text: result,
     };
   }
-  /*let formattedText = "";
-  for (const item of schedule.lunch)
-    formattedText += `**${item.place}**: ${item.food}\n`;*/
   let rows = [];
   for (const item of schedule.lunch)
     rows.push({cells: [{text: item.place}, {text: item.food}]});
   return {
+    fulfillment_text: result,
     payload: {
       google: {
-        fulfillment_text: result,
         expectUserResponse: false,
         richResponse: {
           items: [{
             simpleResponse: {textToSpeech: result},
           }, {
-            /*basicCard: {
-              title: "Lunch Menu",
-              subtitle: momentDate.format("MMM D, YYYY"),
-              formattedText,
-              buttons: [{
-                title: "Open lunch menu",
-                openUrlAction: {url: "https://bell.harker.org/?utm_source=glunch&utm_medium=assistant"},
-              }],
-            }*/
             tableCard: {
               title: "Lunch Menu",
-              subtitle: momentDate.format("MMM D, YYYY"),
               columnProperties: [{header: "Location"}, {header: "Menu Item"}],
               rows,
               buttons: [{
