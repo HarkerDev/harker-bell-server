@@ -25,19 +25,29 @@ mongodb.connect().then(db => {
   });
   /** Responds with the bell schedule when a request from Actions on Google/Google Assistant is received. */
   app.post("/assistant", async (req, res) => {
-    const query = req.body.queryResult;
-    if (!query.intent) return res.status(400);
-    switch (query.intent.name) {
-      // Get bell schedule
-      case "projects/harker-dev/agent/intents/37afe580-ee5c-4876-84b2-5744bbfa71bb":
-      case "projects/harker-dev/agent/intents/ad05a529-e493-41af-8512-dba54e2c5230":
-        return res.send(await handleScheduleRequest(query, db));
-      // Get next period
-      case "projects/harker-dev/agent/intents/8934297d-8426-4b0c-9114-6c38e727d6ab":
-        return res.send(await handlePeriodRequest(query, db));
-      // Get lunch menu
-      case "projects/harker-dev/agent/intents/b60bd193-494d-4567-905d-86354cc60733":
-        return res.send(await handleLunchRequest(query, db));
+    try {
+      const query = req.body.queryResult;
+      if (!query.intent) return res.status(400);
+      switch (query.intent.name) {
+        // Get bell schedule
+        case "projects/harker-dev/agent/intents/37afe580-ee5c-4876-84b2-5744bbfa71bb":
+        case "projects/harker-dev/agent/intents/ad05a529-e493-41af-8512-dba54e2c5230":
+          return res.send(await handleScheduleRequest(query, db));
+        // Get next period
+        case "projects/harker-dev/agent/intents/0c87869e-6cc5-4802-8189-097c46c80525":
+        case "projects/harker-dev/agent/intents/8934297d-8426-4b0c-9114-6c38e727d6ab":
+          return res.send(await handleNextPeriodRequest(query, db));
+        // Get period end
+        case "projects/harker-dev/agent/intents/8b404980-e565-4441-8d76-33b28d54eaaa":
+        case "projects/harker-dev/agent/intents/442fa531-5773-4621-a4c1-25b61cdfee18":
+          return res.send(await handlePeriodEndRequest(query, db));
+        // Get lunch menu
+        case "projects/harker-dev/agent/intents/b60bd193-494d-4567-905d-86354cc60733":
+          return res.send(await handleLunchRequest(query, db));
+      }
+    } catch (err) {
+      sentry.captureException(err);
+      return res.status(500).send("Internal error.");
     }
     let date = new Date(query.parameters.date.substring(0, 10));
     const now = new Date();
@@ -123,7 +133,7 @@ mongodb.connect().then(db => {
     });
   });
 }).catch(err => {
-  throw err;
+  sentry.captureException(err);
 });
 
 // Options for relative dates using Moment
@@ -181,7 +191,7 @@ async function handleScheduleRequest(query, db) {
  * @param {Object} query  the query object
  * @param {MongoDB.Db} db reference to the database
  */
-async function handlePeriodRequest(query, db) {
+async function handleNextPeriodRequest(query, db) {
   const now = new Date();
   let date = new Date(now-(now.getTimezoneOffset()*60*1000));
   let result = "";
@@ -211,6 +221,70 @@ async function handlePeriodRequest(query, db) {
  * @param {Object} query  the query object
  * @param {MongoDB.Db} db reference to the database
  */
+async function handlePeriodEndRequest(query, db) {
+  const now = new Date();
+  let date = new Date(now-(now.getTimezoneOffset()*60*1000));
+  let result = "";
+  while (!result.length) {
+    let schedule = await (await db.collection("schedules").find({
+      date: {$gte: new Date(date.toJSON().substring(0, 10))}
+    }).sort({date: 1}).limit(1)).toArray();
+    for (const period of schedule[0].schedule) {
+      if (period.end > date) {
+        const momentDate = moment(period.end), momentNow = moment(now);
+        if (momentDate.isAfter(momentNow, "day")) {
+          const relDate = momentDate.calendar(momentNow, relDateOptions);
+          result += `<speak>${period.name} ends ${relDate} at <say-as interpret-as="time">${period.end.toJSON().substring(11, 16)}</say-as>.</speak>`;
+        } else
+          result += `<speak>${period.name} ends at <say-as interpret-as="time">${period.end.toJSON().substring(11, 16)}</say-as>.</speak>`;
+        break;
+      }
+    }
+    date = new Date(+new Date(schedule[0].date) + 24*60*60*1000); // increment by 1 day
+  }
+  return {
+    fulfillment_text: result,
+  }
+}
+/**
+ * 
+ * @param {Object} query  the query object
+ * @param {MongoDB.Db} db reference to the database
+ */
 async function handleLunchRequest(query, db) {
-  
+  const date = new Date(query.parameters.date.substring(0, 10) || new Date());
+  const momentDate = moment(query.parameters.date);
+  const relDate = momentDate.calendar(undefined, relDateOptions);
+  const schedule = await db.collection("schedules").findOne({date});
+  let result = "";
+  if (schedule.lunch) {
+    for (const item of schedule.lunch) {
+      if (item.place == query.parameters.lunch_location) {
+        result += `${query.parameters.lunch_location} ${momentDate.isBefore(undefined, "day") ? "served" : "is serving"} ${item.food} ${relDate}.`;
+        break;
+      }
+    }
+    if (!result.length)
+      result += `${query.parameters.lunch_location} is not serving anything ${relDate}.`;
+  } else {
+    result = `Sorry, there's no lunch menu for ${relDate}.`;
+    return {
+      fulfillment_text: result,
+    };
+  }
+  let rows = [];
+  for (const item of schedule.lunch)
+    rows.push({cells: [{text: item.place}, {text: item.food}]});
+  return {
+    fulfillment_text: result,
+    fulfillment_messages: [{
+      table_card: {
+        title: "Lunch Menu",
+        subtitle: momentDate.format("MMM D, YYY"),
+        column_properties: [{header: "Location"}, {header: "Menu Item"}],
+        rows,
+        buttons: [{title: "Open lunch menu", open_uri_action: "https://bell.harker.org/?utm_source=glunch&utm_medium=assistant"}],
+      }
+    }],
+  };
 }
