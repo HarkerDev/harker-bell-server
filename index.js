@@ -47,7 +47,8 @@ mongodb.connect().then(db => {
       }
     } catch (err) {
       sentry.captureException(err);
-      return res.status(500).send("Internal error.");
+      res.status(500).send("Internal error.");
+      throw err;
     }
     let date = new Date(query.parameters.date.substring(0, 10));
     const now = new Date();
@@ -171,7 +172,7 @@ async function handleScheduleRequest(query, db) {
   const relDate = momentDate.calendar(undefined, relDateOptions);
   const schedule = await db.collection("schedules").findOne({date});
   let result = "<speak>"+relDate;
-  if (schedule) {
+  if (schedule && schedule.code) {
     result += (momentDate.isBefore(undefined, "day") ? " was " : " is ");
     if (schedule.variant) {
       result += startsWithVowel(schedule.variant) ? "an " : "a ";
@@ -257,15 +258,15 @@ async function handleLunchRequest(query, db) {
   const relDate = momentDate.calendar(undefined, relDateOptions);
   const schedule = await db.collection("schedules").findOne({date});
   let result = "";
-  if (schedule.lunch) {
+  if (schedule && schedule.lunch.length) {
     for (const item of schedule.lunch) {
       if (item.place == query.parameters.lunch_location) {
-        result += `${query.parameters.lunch_location} ${momentDate.isBefore(undefined, "day") ? "served" : "is serving"} ${item.food} ${relDate}.`;
+        result += `${query.parameters.lunch_location} ${momentDate.isBefore(undefined, "day") ? "served" : "is serving"} ${item.food} for ${relDate}.`;
         break;
       }
     }
     if (!result.length)
-      result += `${query.parameters.lunch_location} is not serving anything ${relDate}.`;
+      result += `${query.parameters.lunch_location} is not serving anything for ${relDate}.`;
   } else {
     result = `Sorry, there's no lunch menu for ${relDate}.`;
     return {
