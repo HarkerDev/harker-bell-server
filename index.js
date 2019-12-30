@@ -135,20 +135,42 @@ async function handleScheduleRequest(query, db) {
   const momentDate = moment(query.parameters.date);
   const relDate = momentDate.calendar(undefined, relDateOptions);
   const schedule = await db.collection("schedules").findOne({date});
-  let result = "<speak>"+relDate;
+  let result = "<speak>"+relDate, title = "";
   if (schedule && schedule.code) {
     result += (momentDate.isBefore(undefined, "day") ? " was " : " is ");
     if (schedule.variant) {
       result += startsWithVowel(schedule.variant) ? "an " : "a ";
       result += schedule.variant+' ';
+      title += schedule.variant.substring(0, 1).toUpperCase()+schedule.variant.substring(1)+" ";
     } else
       result += startsWithVowel(schedule.code) ? "an " : "a ";
     result += `<say-as interpret-as="spell-out">${schedule.code}</say-as> day.</speak>`;
-  } else {
-    result = `Sorry, I couldn't find a schedule for ${relDate}.`;
-  }
+  } else
+    return {
+      fulfillment_text: `Sorry, I couldn't find a schedule for ${relDate}.`,
+    };
+  title += `${schedule.code} schedule`;
   return {
     fulfillment_text: result,
+    payload: {
+      google: {
+        expectUserResponse: false,
+        richResponse: {
+          items: [{
+            simpleResponse: {ssml: result},
+          }, {
+            basicCard: {
+              title,
+              formattedText: momentDate.format("MMM D, YYYY"),
+              buttons: [{
+                title: "Open bell schedule",
+                openUrlAction: {url: "https://bell.harker.org/?utm_source=gsched&utm_medium=assistant"},
+              }],
+            }
+          }]
+        },
+      }
+    }
   };
 }
 /**
@@ -179,6 +201,20 @@ async function handleNextPeriodRequest(query, db) {
   }
   return {
     fulfillment_text: result,
+    payload: {
+      google: {
+        expectUserResponse: false,
+        richResponse: {
+          items: [{
+            simpleResponse: {ssml: result},
+          }],
+          linkOutSuggestion: {
+            destinationName: "bell schedule",
+            openUrlAction: {url: "https://bell.harker.org/?utm_source=gpstart&utm_medium=assistant"},
+          },
+        },
+      }
+    }
   }
 }
 /**
@@ -209,6 +245,20 @@ async function handlePeriodEndRequest(query, db) {
   }
   return {
     fulfillment_text: result,
+    payload: {
+      google: {
+        expectUserResponse: false,
+        richResponse: {
+          items: [{
+            simpleResponse: {ssml: result},
+          }],
+          linkOutSuggestion: {
+            destinationName: "bell schedule",
+            openUrlAction: {url: "https://bell.harker.org/?utm_source=gpend&utm_medium=assistant"},
+          },
+        },
+      }
+    }
   }
 }
 /**
@@ -263,7 +313,7 @@ async function handleLunchRequest(query, db) {
               }],
             }
           }]
-        }
+        },
       }
     }
   };
