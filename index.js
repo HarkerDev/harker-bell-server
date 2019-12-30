@@ -241,12 +241,13 @@ async function handleLunchRequest(query, db) {
   for (const item of schedule.lunch)
     formattedText += `**${item.place}**: ${item.food}\n`;
   return {
-    fulfillment_text: result,
     payload: {
       google: {
         expectUserResponse: false,
         richResponse: {
           items: [{
+            simpleResponse: {ssml: result},
+          }, {
             basicCard: {
               title: "Lunch Menu",
               subtitle: momentDate.format("MMM D, YYYY"),
