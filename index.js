@@ -186,19 +186,21 @@ async function handlePeriodRequest(query, db) {
   let date = new Date(now-(now.getTimezoneOffset()*60*1000));
   let result = "";
   while (!result.length) {
-    let schedule = await db.collection("schedules").findOne({date: {$gte: date}});
-    for (const period of schedule.schedule) {
-      if (new Date(period.start) > date && /(^P[1-9]$)|Assembly|Advisory|Advisee|Meeting/.test(period.name)) {
-        let momentDate = moment(now);
-        if (momentDate.isAfter(undefined, "day")) {
-          const relDate = momentDate.calendar(undefined, relDateOptions);
-          result += `<speak>${period.name} starts ${relDate} at <say-as interpret-as="time">${period.start.substring(11, 16)}</say-as>.</speak>`;
+    let schedule = await (await db.collection("schedules").find({
+      date: {$gte: new Date(date.toJSON().substring(0, 10))}
+    }).sort({date: 1}).limit(1)).toArray();
+    for (const period of schedule[0].schedule) {
+      if (period.start > date && /(^P[1-9]$)|Assembly|Advisory|Advisee|Meeting/.test(period.name)) {
+        const momentDate = moment(period.start), momentNow = moment(now);
+        if (momentDate.isAfter(momentNow, "day")) {
+          const relDate = momentDate.calendar(momentNow, relDateOptions);
+          result += `<speak>${period.name} starts ${relDate} at <say-as interpret-as="time">${period.start.toJSON().substring(11, 16)}</say-as>.</speak>`;
         } else
-          result += `<speak>${period.name} starts at <say-as interpret-as="time">${period.start.substring(11, 16)}</say-as>.</speak>`;
+          result += `<speak>${period.name} starts at <say-as interpret-as="time">${period.start.toJSON().substring(11, 16)}</say-as>.</speak>`;
         break;
       }
     }
-    date = new Date(+date + 24*60*60*1000);
+    date = new Date(+new Date(schedule[0].date) + 24*60*60*1000); // increment by 1 day
   }
   return {
     fulfillment_text: result,
