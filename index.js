@@ -21,7 +21,7 @@ mongodb.connect().then(db => {
   app.use("/admin", require("./admin"));
 
   app.get("/", (req, res) => {
-    res.send("You found a secret page! Come work with us at <a href=\"https://dev.harker.org/join/\">dev.harker.org/join</a>."+new Date().toString());
+    res.send("You found a secret page! Come work with us at <a href=\"https://dev.harker.org/join/\">dev.harker.org/join</a>.");
   });
   /** Responds with the bell schedule when a request from Actions on Google/Google Assistant is received. */
   app.post("/assistant", async (req, res) => {
@@ -49,7 +49,7 @@ mongodb.connect().then(db => {
       sentry.captureException(err);
       return res.status(500).send("Internal error.");
     }
-    return res.status(404).send("Action not found.");
+    return res.send("Action not found.");
   });
   
   app.use(sentry.Handlers.errorHandler());
