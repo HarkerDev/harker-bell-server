@@ -31,18 +31,18 @@ mongodb.connect().then(db => {
       switch (query.intent.name) {
         // Get bell schedule
         case "projects/harker-bell/agent/intents/37afe580-ee5c-4876-84b2-5744bbfa71bb":
-        case "projects/harker-dev/agent/intents/ad05a529-e493-41af-8512-dba54e2c5230":
+        case "projects/harker-dev/agent/intents/c96f9a09-488d-4549-a797-4554492bc6a6":
           return res.send(await handleScheduleRequest(query, db));
         // Get next period
         case "projects/harker-bell/agent/intents/0c87869e-6cc5-4802-8189-097c46c80525":
-        case "projects/harker-dev/agent/intents/8934297d-8426-4b0c-9114-6c38e727d6ab":
+        case "projects/harker-dev/agent/intents/47162ef2-f484-46da-acd6-80ac2f4ca667":
           return res.send(await handleNextPeriodRequest(query, db));
         // Get period end
         case "projects/harker-bell/agent/intents/8b404980-e565-4441-8d76-33b28d54eaaa":
-        case "projects/harker-dev/agent/intents/442fa531-5773-4621-a4c1-25b61cdfee18":
+        case "projects/harker-dev/agent/intents/7aad77d4-60fe-46ff-ae88-b24e867552e3":
           return res.send(await handlePeriodEndRequest(query, db));
         // Get lunch menu
-        case "projects/harker-dev/agent/intents/b60bd193-494d-4567-905d-86354cc60733":
+        case "projects/harker-dev/agent/intents/24d439a2-aa00-44fd-b8cd-15a6e8020caf":
           return res.send(await handleLunchRequest(query, db));
       }
     } catch (err) {
