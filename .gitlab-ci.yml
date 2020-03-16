@@ -59,7 +59,7 @@ variables:
   ROLLOUT_RESOURCE_TYPE: deployment
   
   CI_PROJECT_PATH_SLUG: harker-bell
-  KUBE_NAMESPACE: harker-bell
+  KUBE_NAMESPACE: bell
   
   TEST_DISABLED: "true"
 
@@ -227,6 +227,8 @@ dast:
     elif [ -n "$ADDITIONAL_HOSTS" ]; then
       additional_hosts="{$ADDITIONAL_HOSTS}"
     fi
+    
+    helm delete "$name" --purge || true
 
     if [[ -n "$DB_INITIALIZE" && -z "$(helm ls -q "^$name$")" ]]; then
       echo "Deploying first release with database initialization..."
