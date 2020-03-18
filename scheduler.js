@@ -72,6 +72,8 @@ async function scheduleNextBell() {
     date = new Date(+new Date(schedule[0].date) + 24*60*60*1000); // increment by 1 day
   }
   nextBell = new Date(+nextBell+(nextBell.getTimezoneOffset()*60*1000));
+  console.log("NOW: "+new Date().toISOString());
+  console.log("NEXT: "+nextBell.toISOString());
   job = scheduler.scheduleJob(nextBell, () => {
     socket.get().volatile.emit(("virtual bell", isStartBell));
     setTimeout(() => scheduleNextBell());
