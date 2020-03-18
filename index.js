@@ -4,6 +4,7 @@ const app = express();
 const MongoDB = require("mongodb");
 const mongodb = require("./db");
 const socketio = require("./socket");
+const scheduler = require("./scheduler");
 const sentry = require("@sentry/node");
 const moment = require("moment");
 
@@ -19,6 +20,7 @@ mongodb.connect().then(db => {
   console.log("Connected to DB.");
   app.use("/api", require("./api"));
   app.use("/admin", require("./admin"));
+  app.use("/scheduler", require("./scheduler").router);
 
   app.get("/", (req, res) => {
     res.send("You found a secret page! Come work with us at <a href=\"https://dev.harker.org/join/\">dev.harker.org/join</a>.");
@@ -57,19 +59,18 @@ mongodb.connect().then(db => {
     console.log("Server running on port "+process.env.PORT);
   });
   
-  socketio.connect(server).then(io => {
+  socketio.connect(server).then(async io => {
     io.on("connection", async socket => {
       /*console.log(new Date().toLocaleString()+":\t"+socket.id+" connected");
       socket.on("disconnect", () => {
         console.log(new Date().toLocaleString()+":\t"+socket.id+" disconnected");
       });*/
+      socket.on("ping", () => socket.emit("pong"));
       socket.on("error", err => {
         console.error(err);
         sentry.captureException(err);
       });
       socket.on("request schedule", async (data, callback) => {
-        console.log(new Date().toJSON()+":\t"+socket.id+" requested schedule "+JSON.stringify(data));
-        console.log(socket.request.headers["user-agent"]);
         let schedules = await db.collection("schedules").find({
           date: {
             $gte: new Date(data.start),
@@ -104,6 +105,7 @@ mongodb.connect().then(db => {
       });
       socket.emit("update message", (await db.collection("misc").findOne({type: "message"})).message);
     });
+    scheduler.scheduleNextBell();
   });
 }).catch(err => {
   sentry.captureException(err);
@@ -184,7 +186,7 @@ async function handleNextPeriodRequest(query, db) {
   let result = "";
   while (!result.length) {
     let schedule = await (await db.collection("schedules").find({
-      date: {$gte: new Date(date.toJSON().substring(0, 10))}
+      date: {$gte: new Date(date.toISOString().substring(0, 10))}
     }).sort({date: 1}).limit(1)).toArray();
     for (const period of schedule[0].schedule) {
       if (period.start > date && /(^P[1-9]$)|Assembly|Advisory|Advisee|Meeting/.test(period.name)) {
@@ -228,7 +230,7 @@ async function handlePeriodEndRequest(query, db) {
   let result = "";
   while (!result.length) {
     let schedule = await (await db.collection("schedules").find({
-      date: {$gte: new Date(date.toJSON().substring(0, 10))}
+      date: {$gte: new Date(date.toISOString().substring(0, 10))}
     }).sort({date: 1}).limit(1)).toArray();
     for (const period of schedule[0].schedule) {
       if (period.end > date) {

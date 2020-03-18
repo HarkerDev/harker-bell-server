@@ -265,7 +265,8 @@ This page is meant for internal use only.
             'read',
             'singleWrite',
             'bulkWrite',
-            'editMessage'
+            'editMessage',
+            'special'
           ]
         }
       }
