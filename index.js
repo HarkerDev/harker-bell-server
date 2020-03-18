@@ -17,11 +17,11 @@ app.use(express.json()); // use new built-in Express middleware
 app.use(express.urlencoded());
 mongodb.connect().then(db => {
   console.log("Connected to DB.");
+  const scheduler = require("./scheduler");
+  
   app.use("/api", require("./api"));
   app.use("/admin", require("./admin"));
-  app.use("/scheduler", require("./scheduler").router);
-  
-  const scheduler = require("./scheduler");
+  app.use("/scheduler", scheduler.router);
 
   app.get("/", (req, res) => {
     res.send("You found a secret page! Come work with us at <a href=\"https://dev.harker.org/join/\">dev.harker.org/join</a>.");
