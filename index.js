@@ -66,7 +66,6 @@ mongodb.connect().then(db => {
       socket.on("disconnect", () => {
         console.log(new Date().toLocaleString()+":\t"+socket.id+" disconnected");
       });*/
-      socket.on("ping", () => socket.emit("pong"));
       socket.on("error", err => {
         console.error(err);
         sentry.captureException(err);
