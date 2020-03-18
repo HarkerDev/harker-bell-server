@@ -4,7 +4,6 @@ const app = express();
 const MongoDB = require("mongodb");
 const mongodb = require("./db");
 const socketio = require("./socket");
-const scheduler = require("./scheduler");
 const sentry = require("@sentry/node");
 const moment = require("moment");
 
@@ -21,6 +20,8 @@ mongodb.connect().then(db => {
   app.use("/api", require("./api"));
   app.use("/admin", require("./admin"));
   app.use("/scheduler", require("./scheduler").router);
+  
+  const scheduler = require("./scheduler");
 
   app.get("/", (req, res) => {
     res.send("You found a secret page! Come work with us at <a href=\"https://dev.harker.org/join/\">dev.harker.org/join</a>.");
