@@ -4,6 +4,7 @@ const router = express.Router();
 const mongodb = require("./db");
 const db = mongodb.get();
 const socket = require("./socket");
+const sentry = require("@sentry/node");
 const scheduler = require("node-schedule");
 
 var job;
@@ -71,10 +72,22 @@ async function scheduleNextBell() {
     }
     date = new Date(+new Date(schedule[0].date) + 24*60*60*1000); // increment by 1 day
   }
-  nextBell = new Date(+nextBell+(nextBell.getTimezoneOffset()*60*1000));
+  nextBell = new Date(+nextBell + (nextBell.getTimezoneOffset()*60*1000));
   job = scheduler.scheduleJob(nextBell, () => {
-    socket.get().volatile.emit("virtual bell", isStartBell);
+    const vals = [], now = new Date();
+    socket.get().volatile.emit("virtual bell", isStartBell, () => {
+      vals.push((new Date()-now)/2);
+    });
     setTimeout(() => scheduleNextBell());
+    /*setTimeout(() => {
+      
+    }, 30000);*/
+  });
+  sentry.withScope(scope => {
+    scope.setTags({
+      median: 101,
+    });
+    sentry.captureMessage("Virtual bell broadcasted");
   });
 }
 

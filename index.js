@@ -11,6 +11,7 @@ sentry.init({
   dsn: process.env.SENTRY,
   release: "harker-bell-server@"+require("./package.json").version,
 });
+sentry.captureMessage("Virtual bell broadcasted");
 console.log("Starting...");
 app.use(sentry.Handlers.requestHandler());
 app.use(express.json()); // use new built-in Express middleware
