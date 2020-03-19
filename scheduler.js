@@ -7,7 +7,7 @@ const socket = require("./socket");
 const sentry = require("@sentry/node");
 const scheduler = require("node-schedule");
 
-var job, vals, start;
+var job, vals = [], start = new Date();
 router.use(cors());
 
 router.post("/stop", async (req, res) => {
