@@ -11,7 +11,6 @@ sentry.init({
   dsn: process.env.SENTRY,
   release: "harker-bell-server@"+require("./package.json").version,
 });
-sentry.captureMessage("Virtual bell broadcasted");
 console.log("Starting...");
 app.use(sentry.Handlers.requestHandler());
 app.use(express.json()); // use new built-in Express middleware
@@ -104,6 +103,7 @@ mongodb.connect().then(db => {
           socket.emit("update schedule", schedules, lastRevision[0]._id);
         }
       });
+      socket.on("virtual bell ack", () => scheduler.receiveAck());
       socket.emit("update message", (await db.collection("misc").findOne({type: "message"})).message);
     });
     scheduler.scheduleNextBell();

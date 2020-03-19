@@ -7,7 +7,7 @@ const socket = require("./socket");
 const sentry = require("@sentry/node");
 const scheduler = require("node-schedule");
 
-var job;
+var job, vals, start;
 router.use(cors());
 
 router.post("/stop", async (req, res) => {
@@ -74,21 +74,28 @@ async function scheduleNextBell() {
   }
   nextBell = new Date(+nextBell + (nextBell.getTimezoneOffset()*60*1000));
   job = scheduler.scheduleJob(nextBell, () => {
-    const vals = [], now = new Date();
-    socket.get().volatile.emit("virtual bell", isStartBell, () => {
-      vals.push((new Date()-now)/2);
-    });
+    vals = [];
+    start = new Date();
+    socket.get().volatile.emit("virtual bell", isStartBell);
     setTimeout(() => scheduleNextBell());
-    /*setTimeout(() => {
-      
-    }, 30000);*/
-  });
-  sentry.withScope(scope => {
-    scope.setTags({
-      median: 101,
-    });
-    sentry.captureMessage("Virtual bell broadcasted");
+    setTimeout(() => {
+      sentry.withScope(scope => {
+        scope.setTags({
+          count: vals.length,
+          min: vals[0],
+          max: vals[vals.length-1],
+          median: vals[Math.floor(vals.length/2)],
+          firstQuartile: vals[Math.ceil(vals.length/4)-1],
+          thirdQuartile: vals[Math.ceil(vals.length*3/4)-1],
+          ninetyPctl: vals[Math.ceil(vals.length*0.9)-1],
+        });
+        sentry.captureMessage("Virtual bell broadcasted");
+      });
+    }, 30000);
   });
 }
+function receiveAck() {
+  vals.push((new Date()-start)/2);
+}
 
-module.exports = {scheduleNextBell, router};
+module.exports = {scheduleNextBell, receiveAck, router};
