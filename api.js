@@ -19,7 +19,7 @@ router.get("/schedule", async (req, res) => {
   console.log(req.headers["user-agent"]);
   try {
     let data = await db.collection("schedules").findOne({
-      date: new Date(Date.UTC(+req.body.year, +req.body.month-1, +req.body.day))
+      date: new Date(Date.UTC(+(req.body.year || req.query.year), +(req.body.month || req.query.month)-1, +(req.body.day || req.query.day)))
     });
     if (data) {
       let {_id, lunch, locations, events, preset, ...schedule} = data;
@@ -42,7 +42,7 @@ router.get("/lunchmenu", async (req, res) => {
   console.log(req.headers["user-agent"]);
   try {
     let data = await db.collection("schedules").findOne({
-      date: new Date(Date.UTC(+req.body.year, +req.body.month-1, +req.body.day))
+      date: new Date(Date.UTC(+(req.body.year || req.query.year), +(req.body.month || req.query.month)-1, +(req.body.day || req.query.day)))
     });
     if (data && data.lunch.length != 0)
       return res.send({date: data.date, lunch: data.lunch});
@@ -64,7 +64,7 @@ router.get("/events", async (req, res) => {
   console.log(req.headers["user-agent"]);
   try {
     let data = await db.collection("schedules").findOne({
-      date: new Date(Date.UTC(+req.body.year, +req.body.month-1, +req.body.day))
+      date: new Date(Date.UTC(+(req.body.year || req.query.year), +(req.body.month || req.query.month)-1, +(req.body.day || req.query.day)))
     });
     if (data && data.events.length != 0)
       return res.send({date: data.date, events: data.events});
