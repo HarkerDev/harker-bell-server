@@ -17,7 +17,7 @@ Also note that all dates returned in the JSON response are represented as an [IS
 Be sure to specify either a `Content-Type: application/json` or `Content-Type: application/x-www-form-urlencoded` HTTP header with each request, depending on which type you use, or else our server may get angry and throw a fit (a.k.a. a 400 error).
 :::
 
-Because no authentication is required, we may enforce IP-based rate limiting for all requests. If you encounter problems with accessing our API, please contact <a href="mailto:dev@harker.org" target="_blank">dev@harker.org</a>.
+Because no authentication is required, we may enforce IP-based rate limiting on all requests. If you encounter problems with accessing our API, please contact <a href="mailto:dev@harker.org" target="_blank">dev@harker.org</a>.
 
 ## `GET` /schedule
 
@@ -128,7 +128,7 @@ Returns a list of events for a given date.
 ```
 
 ### Event Categories
-Possible categories (and their corresponding color on the bell schedule app):
+Possible categories (and their corresponding color in the bell schedule app):
 Category | Identifier | Color
 -------- | ---------- | -----
 Schoolwide | `schoolwide` | ![#EA4335](https://placehold.it/10/EA4335?text=+)&nbsp; Red
@@ -170,10 +170,10 @@ curl --request GET \
 
 ## `GET` /clientsInternal
 
-Returns the number of clients currently connected to the Harker Bell websocket server, represented as a number of bytes. **For internal use only.**
+Returns the number of clients currently connected to the Harker Bell websocket server, represented by the length of the response in bytes. **For internal use.**
 
 #### Request Structure
 No parameters necessary.
 
 #### Response Structure
-A string with a length in bytes representing the number of connected clients.
+A string with a size in bytes representing the number of connected clients.
