@@ -8,7 +8,7 @@ const socket = require("./socket");
 const parse = require("csv-parse/lib/sync");
 
 router.use(cors());
-/** For text/* content type. Used in generateLunch. */
+/** For text/csv content type. Used in generateLunch. */
 router.use((req, res, next) => {
   if (req.is("text/*")) {
     req.text = "";
