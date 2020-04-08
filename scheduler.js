@@ -88,6 +88,8 @@ async function scheduleNextBell() {
           firstQuartile: vals[Math.ceil(vals.length/4)-1],
           thirdQuartile: vals[Math.ceil(vals.length*3/4)-1],
           ninetyPctl: vals[Math.ceil(vals.length*0.9)-1],
+          ninety5Pctl: vals[Math.ceil(vals.length*0.95)-1],
+          ninety9Pctl: vals[Math.ceil(vals.length*0.99)-1],
         });
         sentry.captureMessage("Virtual bell broadcasted");
       });
