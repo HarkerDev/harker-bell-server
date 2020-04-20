@@ -5,8 +5,8 @@ var io;
 async function connect(server) {
   try {
     io = socket(server, {
-      pingTimeout: 10000, // consider increasing pingTimeout
-      pingInterval: 10000,
+      pingTimeout: 15000, // consider increasing pingTimeout
+      pingInterval: 25000,
       origins: [
         "bell.harker.org:443",
         "bell.harker.org:80",
