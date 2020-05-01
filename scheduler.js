@@ -54,9 +54,9 @@ async function ensureAuth(access_token, permission) {
 async function scheduleNextBell() {
   const now = new Date();
   let date = new Date(now-(now.getTimezoneOffset()*60*1000));
-  let found = false;
+  let foundPeriod = false;
   let nextBell, isStartBell = false;
-  while (!found) {
+  while (!foundPeriod) {
     let schedule = await (await db.collection("schedules").find({
       date: {$gte: new Date(date.toISOString().substring(0, 10))}
     }).sort({date: 1}).limit(1)).toArray();
@@ -66,7 +66,7 @@ async function scheduleNextBell() {
           nextBell = period.start;
           isStartBell = true;
         } else nextBell = period.end;
-        found = true;
+        foundPeriod = period.name;
         break;
       }
     }
@@ -76,7 +76,7 @@ async function scheduleNextBell() {
   job = scheduler.scheduleJob(nextBell, () => {
     vals = [];
     start = new Date();
-    socket.get().volatile.emit("virtual bell", isStartBell);
+    socket.get().volatile.emit("virtual bell", isStartBell, foundPeriod);
     setTimeout(() => scheduleNextBell());
     setTimeout(() => {
       sentry.withScope(scope => {
