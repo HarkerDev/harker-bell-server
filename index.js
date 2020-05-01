@@ -103,7 +103,7 @@ mongodb.connect().then(db => {
           socket.emit("update schedule", schedules, lastRevision[0]._id);
         }
       });
-      socket.on("virtual bell ack", () => scheduler.receiveAck());
+      socket.on("virtual bell ack", (bellEnabled, notifEnabled) => scheduler.receiveAck(bellEnabled, notifEnabled));
       socket.emit("update message", (await db.collection("misc").findOne({type: "message"})).message);
     });
     scheduler.scheduleNextBell();

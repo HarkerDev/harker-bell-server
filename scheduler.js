@@ -7,7 +7,7 @@ const socket = require("./socket");
 const sentry = require("@sentry/node");
 const scheduler = require("node-schedule");
 
-var job, vals = [], start = new Date();
+var job, vals = [], bells = 0, notifs = 0, start = new Date();
 router.use(cors());
 
 router.post("/stop", async (req, res) => {
@@ -75,6 +75,7 @@ async function scheduleNextBell() {
   nextBell = new Date(+nextBell + (nextBell.getTimezoneOffset()*60*1000));
   job = scheduler.scheduleJob(nextBell, () => {
     vals = [];
+    bells = notifs = 0;
     start = new Date();
     socket.get().volatile.emit("virtual bell", isStartBell, foundPeriod);
     setTimeout(() => scheduleNextBell());
@@ -90,14 +91,17 @@ async function scheduleNextBell() {
           ninetyPctl: vals[Math.ceil(vals.length*0.9)-1],
           ninety5Pctl: vals[Math.ceil(vals.length*0.95)-1],
           ninety9Pctl: vals[Math.ceil(vals.length*0.99)-1],
+          bells, notifs,
         });
         sentry.captureMessage("Virtual bell broadcasted");
       });
     }, 30000);
   });
 }
-function receiveAck() {
+function receiveAck(bellEnabled, notifEnabled) {
   vals.push((new Date()-start)/2);
+  if (bellEnabled) bells++;
+  if (notifEnabled) notifs++;
 }
 
 module.exports = {scheduleNextBell, receiveAck, router};
