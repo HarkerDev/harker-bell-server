@@ -61,8 +61,8 @@ async function scheduleNextBell() {
       date: {$gte: new Date(date.toISOString().substring(0, 10))}
     }).sort({date: 1}).limit(1)).toArray();
     schedule[0].schedule.push(
-      {name: "P8", end: new Date("2020-06-01T14:50:04.000Z")},
-      {name: "P9", end: new Date("2020-06-01T14:50:08.000Z")},
+      {name: "P8", end: new Date("2020-06-01T15:00:04.000Z")},
+      {name: "P9", end: new Date("2020-06-01T15:00:08.000Z")},
     );
     for (const period of schedule[0].schedule) {
       if (period.end > date && /(^P[1-9]$)|Advisory|(Class|School) Meeting|Assembly/.test(period.name)) {
