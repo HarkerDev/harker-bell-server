@@ -178,6 +178,24 @@ router.post("/autofillSchedule", async (req, res) => {
               schedule.schedule.splice(i, 1);
               continue;
           }
+        } else if (period.name == "Activity Block") {
+          switch (date.getUTCDay()) {
+            case 1:
+              period.name = "Spirit / Community Activities";
+              break;
+            case 2:
+              period.name = "Advisory";
+              break;
+            case 3:
+              period.name = "Office Hours";
+              break;
+            case 4:
+              period.name = "Class Meeting";
+              break;
+            case 5:
+              schedule.schedule.splice(i, 1);
+              continue;
+          }
         }
         period.start = new Date(date.toISOString().substr(0, 11)+period.start+"Z");
         period.end = new Date(date.toISOString().substr(0, 11)+period.end+"Z");
