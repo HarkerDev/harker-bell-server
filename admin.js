@@ -193,8 +193,7 @@ router.post("/autofillSchedule", async (req, res) => {
               period.name = "Class Meeting";
               break;
             case 5:
-              schedule.schedule.splice(i, 1);
-              continue;
+              period.name = "Clubs";
           }
         }
         period.start = new Date(date.toISOString().substr(0, 11)+period.start+"Z");
@@ -305,6 +304,23 @@ router.post("/editSchedule", async (req, res) => {
               schedule.schedule.splice(i, 1);
               continue;
           }
+        } else if (period.name == "Activity Block") {
+          switch (date.getUTCDay()) {
+            case 1:
+              period.name = "Spirit / Community Activities";
+              break;
+            case 2:
+              period.name = "Advisory";
+              break;
+            case 3:
+              period.name = "Office Hours";
+              break;
+            case 4:
+              period.name = "Class Meeting";
+              break;
+            case 5:
+              period.name = "Clubs";
+          }
         }
         if (period.start) {
           if (period.start.length <= 12) // if no date part is included
@@ -324,7 +340,7 @@ router.post("/editSchedule", async (req, res) => {
           ...(schedule.schedule && {schedule: schedule.schedule}), // conditionally add key to object
           ...(schedule.preset && {preset: schedule.preset}),
           ...(schedule.code && {code: schedule.code}),
-          ...(schedule.variant && {variant: schedule.variant}),
+          ...({variant: schedule.variant}),
           ...(schedule.name && {name: schedule.name}),
         },
         $setOnInsert: {
@@ -375,6 +391,23 @@ router.post("/addFromPreset", async (req, res) => {
           case 5:
             preset.schedule.splice(i, 1);
             continue;
+        }
+      } else if (period.name == "Activity Block") {
+        switch (date.getUTCDay()) {
+          case 1:
+            period.name = "Spirit / Community Activities";
+            break;
+          case 2:
+            period.name = "Advisory";
+            break;
+          case 3:
+            period.name = "Office Hours";
+            break;
+          case 4:
+            period.name = "Class Meeting";
+            break;
+          case 5:
+            period.name = "Clubs";
         }
       }
       period.start = new Date(date.toISOString().substr(0, 11)+period.start+"Z");
