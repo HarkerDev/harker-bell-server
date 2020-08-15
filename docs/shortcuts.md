@@ -1,7 +1,5 @@
 # Keyboard Shortcuts
 
-The following keyboard shortcuts are provided for your convenience when using the Harker Bell Schedule web app.
-
 Action | Pattern
 ------ | -------
 Next | &rarr;
