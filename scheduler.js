@@ -94,9 +94,10 @@ async function scheduleNextBell() {
           ninety9Pctl: vals[Math.ceil(vals.length*0.99)-1],
           bells, notifs,
         });
-        sentry.captureMessage("Virtual bell broadcasted");
+        scope.setFingerprint(["Virtual bell broadcasted"]);
+        sentry.captureMessage("Virtual bell broadcasted at "+start.toLocaleString());
       });
-    }, 30000);
+    }, 59000);
   });
 }
 function receiveAck(bellEnabled, notifEnabled) {
