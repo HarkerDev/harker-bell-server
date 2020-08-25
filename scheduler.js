@@ -95,7 +95,6 @@ async function scheduleNextBell() {
       };
       sentry.withScope(scope => {
         scope.setTags(tags);
-        scope.setFingerprint(["Virtual bell broadcasted"]);
         sentry.captureMessage("Virtual bell broadcasted at "+start.toLocaleString());
         console.log(start.toLocaleString());
         console.log(tags);
