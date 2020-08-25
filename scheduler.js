@@ -81,21 +81,24 @@ async function scheduleNextBell() {
     socket.get().volatile.emit("virtual bell", isStartBell, foundPeriod);
     setTimeout(() => scheduleNextBell());
     setTimeout(() => {
+      const tags = {
+        count: vals.length,
+        min: vals[0],
+        max: vals[vals.length-1],
+        median: vals[Math.floor(vals.length/2)],
+        firstQuartile: vals[Math.ceil(vals.length/4)-1],
+        thirdQuartile: vals[Math.ceil(vals.length*3/4)-1],
+        ninetyPctl: vals[Math.ceil(vals.length*0.9)-1],
+        ninety5Pctl: vals[Math.ceil(vals.length*0.95)-1],
+        ninety9Pctl: vals[Math.ceil(vals.length*0.99)-1],
+        bells, notifs,
+      };
       sentry.withScope(scope => {
-        scope.setTags({
-          count: vals.length,
-          min: vals[0],
-          max: vals[vals.length-1],
-          median: vals[Math.floor(vals.length/2)],
-          firstQuartile: vals[Math.ceil(vals.length/4)-1],
-          thirdQuartile: vals[Math.ceil(vals.length*3/4)-1],
-          ninetyPctl: vals[Math.ceil(vals.length*0.9)-1],
-          ninety5Pctl: vals[Math.ceil(vals.length*0.95)-1],
-          ninety9Pctl: vals[Math.ceil(vals.length*0.99)-1],
-          bells, notifs,
-        });
+        scope.setTags(tags);
         scope.setFingerprint(["Virtual bell broadcasted"]);
         sentry.captureMessage("Virtual bell broadcasted at "+start.toLocaleString());
+        console.log(start.toLocaleString());
+        console.log(tags);
       });
     }, 59000);
   });
