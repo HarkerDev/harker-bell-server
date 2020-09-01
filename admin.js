@@ -340,8 +340,12 @@ router.post("/editSchedule", async (req, res) => {
           ...(schedule.schedule && {schedule: schedule.schedule}), // conditionally add key to object
           ...(schedule.preset && {preset: schedule.preset}),
           ...(schedule.code && {code: schedule.code}),
-          ...({variant: schedule.variant}),
+          ...(schedule.variant && {variant: schedule.variant}),
           ...(schedule.name && {name: schedule.name}),
+        },
+        $unset: {
+          ...(!schedule.variant && {variant: schedule.variant}),
+          ...(!schedule.name && {name: schedule.name}),
         },
         $setOnInsert: {
           lunch: [],
