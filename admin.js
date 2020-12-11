@@ -181,16 +181,16 @@ router.post("/autofillSchedule", async (req, res) => {
         } else if (period.name == "Activity Block") {
           switch (date.getUTCDay()) {
             case 1:
-              period.name = "Spirit / Community Activities";
+              period.name = "Clubs / Office Hours";
               break;
             case 2:
-              period.name = "Advisory";
+              period.name = "Advisory / Class Meeting";
               break;
             case 3:
               period.name = "Office Hours";
               break;
             case 4:
-              period.name = "Class Meeting";
+              period.name = "Spirit / Assembly";
               break;
             case 5:
               period.name = "Clubs";
@@ -307,16 +307,16 @@ router.post("/editSchedule", async (req, res) => {
         } else if (period.name == "Activity Block") {
           switch (date.getUTCDay()) {
             case 1:
-              period.name = "Spirit / Community Activities";
+              period.name = "Clubs / Office Hours";
               break;
             case 2:
-              period.name = "Advisory";
+              period.name = "Advisory / Class Meeting";
               break;
             case 3:
               period.name = "Office Hours";
               break;
             case 4:
-              period.name = "Class Meeting";
+              period.name = "Spirit / Assembly";
               break;
             case 5:
               period.name = "Clubs";
@@ -399,16 +399,16 @@ router.post("/addFromPreset", async (req, res) => {
       } else if (period.name == "Activity Block") {
         switch (date.getUTCDay()) {
           case 1:
-            period.name = "Spirit / Community Activities";
+            period.name = "Clubs / Office Hours";
             break;
           case 2:
-            period.name = "Advisory";
+            period.name = "Advisory / Class Meeting";
             break;
           case 3:
             period.name = "Office Hours";
             break;
           case 4:
-            period.name = "Class Meeting";
+            period.name = "Spirit / Assembly";
             break;
           case 5:
             period.name = "Clubs";
