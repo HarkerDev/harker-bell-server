@@ -1,10 +1,10 @@
 # Database Schemas
 
-This page contains database schemas used for data stored in MongoDB.
-
 ::: warning Note
-This page is meant for internal use only.
+This page is scary and is meant for internal use only.
 :::
+
+This page contains database schemas for documents stored in MongoDB.
 
 ### Collection `harker-bell/schedules`
 ```js

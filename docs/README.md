@@ -14,7 +14,7 @@ Safari | 9+
 Microsoft Edge | Supported
 Opera | Supported
 Samsung Internet | Supported
-Internet Explorer | 11
+Internet Explorer | Not supported
 
 ### Offline Mode
 

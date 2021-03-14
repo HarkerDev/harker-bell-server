@@ -3,7 +3,7 @@
 ---
 # API Documentation
 
-We provide a free public REST Application Programming Interface (API) that you can use to incorporate real bell schedule, lunch menu, and event data into your project.
+We provide a free public REST API that you can use to incorporate real bell schedule, lunch menu, and event data into your project.
 
 ## Introduction
 
@@ -14,16 +14,16 @@ Every endpoint supports both JSON and URL-encoded request bodies. The code examp
 Also note that all dates returned in the JSON response are represented as an [ISO 8601](https://xkcd.com/1179) date-time string in UTC time.
 
 ::: tip Important:
-Be sure to specify either a `Content-Type: application/json` or `Content-Type: application/x-www-form-urlencoded` HTTP header with each request, depending on which type you use, or else our server may get angry and throw a fit (a.k.a. a 400 error).
+Be sure to specify either a `Content-Type: application/json` or `Content-Type: application/x-www-form-urlencoded` HTTP header with each request, depending on which type you use, or else our server may get angry and throw a fit (a 400 error).
 :::
 
 Because no authentication is required, we may enforce IP-based rate limiting on all requests. If you encounter problems with accessing our API, please contact <a href="mailto:dev@harker.org" target="_blank">dev@harker.org</a>.
 
 ## `GET` /schedule
 
-Returns the bell schedule for a given date.
+Gets the bell schedule for a given date.
 
-#### Request Schema
+#### Request Structure
 ```json
 {
   "month": number, // between 1 and 12
@@ -32,7 +32,7 @@ Returns the bell schedule for a given date.
 }
 ```
 
-#### Response Schema
+#### Response Structure
 ```json
 {
   "date": string, // ISO string for the date at UTC midnight
@@ -63,9 +63,9 @@ curl --request GET \
 
 ## `GET` /lunchmenu
 
-Returns the lunch menu for a given date.
+Gets the lunch menu for a given date.
 
-#### Request Schema
+#### Request Structure
 ```json
 {
   "month": number, // between 1 and 12
@@ -74,7 +74,7 @@ Returns the lunch menu for a given date.
 }
 ```
 
-#### Response Schema
+#### Response Structure
 ```json
 {
   "date": string, // ISO string for the date at UTC midnight
@@ -100,9 +100,9 @@ curl --request GET \
 
 ## `GET` /events
 
-Returns a list of events for a given date.
+Gets a list of events for a given date.
 
-#### Request Schema
+#### Request Structure
 ```json
 {
   "month": number, // between 1 and 12
@@ -111,7 +111,7 @@ Returns a list of events for a given date.
 }
 ```
 
-#### Response Schema
+#### Response Structure
 ```json
 {
   "date": string, // ISO string for the date at UTC midnight
@@ -154,7 +154,7 @@ curl --request GET \
 
 ## `GET` /clients
 
-Returns the number of clients currently connected to the Harker Bell websocket server.
+Gets the number of clients currently connected to the Harker Bell websocket server.
 
 #### Request Structure
 No parameters necessary.
@@ -170,7 +170,7 @@ curl --request GET \
 
 ## `GET` /clientsInternal
 
-Returns the number of clients currently connected to the Harker Bell websocket server, represented by the length of the response in bytes. **For internal use.**
+Gets the number of clients currently connected to the Harker Bell websocket server, represented by the length of the response in bytes. **For internal use.**
 
 #### Request Structure
 No parameters necessary.
