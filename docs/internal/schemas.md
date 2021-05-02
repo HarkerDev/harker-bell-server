@@ -34,7 +34,10 @@ This page contains database schemas for documents stored in MongoDB.
             'name',
             'start',
             'end'
-          ],
+          ], 
+          optional: [
+              'link'
+          ]
           properties: {
             name: {
               bsonType: 'string',
@@ -47,6 +50,10 @@ This page contains database schemas for documents stored in MongoDB.
             end: {
               bsonType: 'date',
               description: 'ending time of the period'
+            },
+            link: {
+                bsonType: 'string'
+                description: 'link for events or assemblies'
             }
           },
           additionalProperties: false
