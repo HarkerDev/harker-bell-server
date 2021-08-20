@@ -32,7 +32,7 @@ router.post("/start", async (req, res) => {
   try {
     const auth = await ensureAuth(req.body.access_token, "special");
     if (!auth) return res.status(401).send("Unauthorized access.");
-    if (!job) scheduleNextBell();
+    // if (!job) scheduleNextBell();
     return res.send("Done");
   } catch (err) {
     console.error(err);
