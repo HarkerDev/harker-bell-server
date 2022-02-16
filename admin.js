@@ -123,7 +123,7 @@ router.post("/editAnnouncement", async (req, res) => {
       $set: {message: req.body.message, date: new Date().toLocaleString()}
     });
     const io = socket.get();
-    io.emit("update message", req.body.message);
+    io.emit("update announcement", req.body.message);
     return res.send("Success.");
   } catch (err) {
     console.error(err);
