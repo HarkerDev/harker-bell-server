@@ -8,7 +8,7 @@ var db;
 var client;
 async function connect() {
   console.log(process.env.DB_HOST);
-  client = await MongoClient.connect(process.env.DB_HOST);
+  client = await MongoClient.connect(process.env.DB_HOST, { useNewUrlParser: true });
   db = client.db(process.env.DB_NAME);
   return db;
 }

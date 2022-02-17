@@ -14,7 +14,7 @@ sentry.init({
 console.log("Starting...");
 app.use(sentry.Handlers.requestHandler());
 app.use(express.json()); // use new built-in Express middleware
-app.use(express.urlencoded());
+app.use(express.urlencoded({extended:false}));
 mongodb.connect().then(db => {
   console.log("Connected to DB.");
   const scheduler = require("./scheduler");
@@ -67,6 +67,7 @@ mongodb.connect().then(db => {
         console.log(new Date().toLocaleString()+":\t"+socket.id+" disconnected");
       });*/
       socket.on("error", err => {
+        console.log("error")
         console.error(err);
         sentry.captureException(err);
       });
@@ -109,7 +110,10 @@ mongodb.connect().then(db => {
     scheduler.scheduleNextBell();
   });
 }).catch(err => {
+  console.log("bing")
+  console.log(err)
   sentry.captureException(err);
+
 });
 
 // Options for relative dates using Moment
