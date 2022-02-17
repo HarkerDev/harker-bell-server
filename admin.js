@@ -96,13 +96,13 @@ router.post("/editMessage", async (req, res) => {
  * @param {string} access_token access token required for authentication
  */
 router.post("/getAnnouncement", async (req, res) => {
-  console.log(new Date().toJSON()+":\t POST /admin/getMessage "+JSON.stringify(req.body));
+  console.log(new Date().toJSON()+":\t POST /admin/getAnnouncement "+JSON.stringify(req.body));
   console.log(req.headers["user-agent"]);
   try {
     const auth = await ensureAuth(req.body.access_token, "read");
     if (!auth) return res.status(401).send("Unauthorized access.");
     const data = await db.collection("misc").findOne({type: "announcement"});
-    return res.send(data);
+    return res.send(data.message);
   } catch (err) {
     console.error(err);
     return res.status(500).send(err);
@@ -120,7 +120,7 @@ router.post("/editAnnouncement", async (req, res) => {
     const auth = await ensureAuth(req.body.access_token, "editMessage");
     if (!auth) return res.status(401).send("Unauthorized access.");
     await db.collection("misc").updateOne({type: "announcement"}, {
-      $set: {message: req.body.message, date: new Date().toLocaleString()}
+      $set: {message: req.body.message}
     });
     const io = socket.get();
     io.emit("update announcement", req.body.message);
