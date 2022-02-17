@@ -117,7 +117,7 @@ router.post("/editAnnouncement", async (req, res) => {
   console.log(new Date().toJSON()+":\t POST /admin/editAnnouncement "+JSON.stringify(req.body));
   console.log(req.headers["user-agent"]);
   try {
-    const auth = await ensureAuth(req.body.access_token, "editAnnouncement");
+    const auth = await ensureAuth(req.body.access_token, "editMessage");
     if (!auth) return res.status(401).send("Unauthorized access.");
     await db.collection("misc").updateOne({type: "announcement"}, {
       $set: {message: req.body.message, date: new Date().toLocaleString()}
