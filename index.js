@@ -14,7 +14,7 @@ sentry.init({
 console.log("Starting...");
 app.use(sentry.Handlers.requestHandler());
 app.use(express.json()); // use new built-in Express middleware
-app.use(express.urlencoded({extended:false}));
+app.use(express.urlencoded());
 mongodb.connect().then(db => {
   console.log("Connected to DB.");
   const scheduler = require("./scheduler");
