@@ -106,6 +106,7 @@ mongodb.connect().then(db => {
       });
       socket.on("virtual bell ack", (bellEnabled, notifEnabled) => scheduler.receiveAck(bellEnabled, notifEnabled));
       socket.emit("update message", (await db.collection("misc").findOne({type: "message"})).message);
+      socket.emit("update announcement", (await db.collection("misc").findOne({type: "announcement"})).message);
     });
     scheduler.scheduleNextBell();
   });
