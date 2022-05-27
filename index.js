@@ -108,7 +108,7 @@ mongodb.connect().then(db => {
       socket.emit("update message", (await db.collection("misc").findOne({type: "message"})).message);
       socket.emit("update announcement", (await db.collection("misc").findOne({type: "announcement"})).message);
     });
-    scheduler.scheduleNextBell();
+    // scheduler.scheduleNextBell();
   });
 }).catch(err => {
   console.log("bing")

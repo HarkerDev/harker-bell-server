@@ -52,6 +52,8 @@ async function ensureAuth(access_token, permission) {
 
 /** Schedule the next virtual bell. */
 async function scheduleNextBell() {
+  return; // Disable virtual bell scheduler
+
   const now = new Date();
   let date = new Date(now-(now.getTimezoneOffset()*60*1000));
   let foundPeriod = false;
@@ -60,17 +62,19 @@ async function scheduleNextBell() {
     let schedule = await (await db.collection("schedules").find({
       date: {$gte: new Date(date.toISOString().substring(0, 10))}
     }).sort({date: 1}).limit(1)).toArray();
-    for (const period of schedule[0].schedule) {
-      if (period.end > date && /(^P[1-9]$)|Advisory|(Class|School) Meeting|Assembly/.test(period.name)) {
-        if (period.start > date) {
-          nextBell = period.start;
-          isStartBell = true;
-        } else nextBell = period.end;
-        foundPeriod = period.name;
-        break;
+    if (schedule[0] != null) {
+      for (const period of schedule[0].schedule) {
+        if (period.end > date && /(^P[1-9]$)|Advisory|(Class|School) Meeting|Assembly/.test(period.name)) {
+          if (period.start > date) {
+            nextBell = period.start;
+            isStartBell = true;
+          } else nextBell = period.end;
+          foundPeriod = period.name;
+          break;
+        }
       }
+      date = new Date(+new Date(schedule[0].date) + 24*60*60*1000); // increment by 1 day
     }
-    date = new Date(+new Date(schedule[0].date) + 24*60*60*1000); // increment by 1 day
   }
   nextBell = new Date(+nextBell + (nextBell.getTimezoneOffset()*60*1000));
   console.log("Next bell is scheduled for "+nextBell.toLocaleString());
