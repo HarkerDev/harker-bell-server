@@ -4,6 +4,7 @@
   "description": "Server exposing public API and websocket for Harker Bell Schedule.",
   "main": "index.js",
   "scripts": {
+    "start-bell-dev": "npm run start",
     "dev": "nodemon index.js",
     "start": "node index.js",
     "test": "echo \"Error: no test specified\"",

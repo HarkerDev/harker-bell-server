@@ -1,0 +1,1 @@
+pm2 restart "npm run start-bell-dev"
