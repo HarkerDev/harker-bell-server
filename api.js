@@ -8,6 +8,8 @@ router.use(cors());
 
 // NOTE: All public APIs can be used by providing URL encoded or JSON request bodies.
 
+router.use("/ical", require("./api/ical"));
+
 /**
  * Retrieves the bell schedule for a single day.
  * @param {number} month  month from 0-11
