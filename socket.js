@@ -12,6 +12,7 @@ async function connect(server) {
       "harker-bell.netlify.com:443",
       "harker-bell.netlify.com:80",
       "localhost:8080",
+      "127.0.0.1:8080",
       "localhost:8081",
       "192.168.1.209:8080",
       "8080-d496a659-a8ae-4d14-8bd3-fccbb55169c0.ws-us02.gitpod.io:443",
