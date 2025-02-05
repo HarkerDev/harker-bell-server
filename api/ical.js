@@ -37,7 +37,7 @@ router.get("/feed", async (req, res) => {
   
   const excludedBlockTitles = excludedBlocks ? excludedBlocks.split(',') : false;
   const excludedLunchDurations = excludedLunches ? excludedLunches.split(',') : false;
-  const includedEventCategories = (req.body.includeEvents || req.query.includeEvents) ? (req.body.includeEvents || req.query.includeEvents).toLowerCase().split(',') : false; // Evebt categories to include, 'all' for all events
+  const includedEventCategories = (req.body.includeEvents || req.query.includeEvents) ? (req.body.includeEvents || req.query.includeEvents).toLowerCase().split(',') : false; // Event categories to include, 'all' for all events
 
   try {
     await db.collection("schedules").find({
