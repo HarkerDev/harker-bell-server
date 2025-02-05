@@ -4,6 +4,8 @@ const router = express.Router();
 const db = require("../db").get();
 const ics = require("ics");
 
+const MS_PER_MIN = 60 * 1000;
+
 router.get("/", async (req, res) => {
   res.redirect(`webcal://bell.harker.org/api/ical/feed?v=1&t=${(new Date).getTime()}&source=root&excludedLunchDurations=45&includeSchedule&includeEvents=all`)
 });
@@ -14,15 +16,16 @@ router.get("/feed", async (req, res) => {
 
   const now = new Date();
 
+  // Date defaults to today
   const year = req.body.year || req.query.year || now.getFullYear();
   const month = req.body.month || req.query.month || now.getUTCMonth() + 1;
   const day = req.body.day || req.query.day || now.getDate();
 
-  const excludedBlocks = req.body.exclude || req.query.exclude;
-  const excludedLunches = req.body.excludedLunchDurations || req.query.excludedLunchDurations;
+  const excludedBlocks = req.body.exclude || req.query.exclude; // Period names to exclude (e.g. Frosh+Mtg.)
+  const excludedLunches = req.body.excludedLunchDurations || req.query.excludedLunchDurations; // Exclude lunch blocks by minute duration
 
   const baseDate = new Date(Date.UTC(+(year), +(month)-1, +(day)));
-  const range = clamp(req.body.range || req.query.range || 90, 1, 120);
+  const range = clamp(req.body.range || req.query.range || 90, 1, 125); // Number of days to include before and after baseDate
 
   const startDate = new Date(baseDate);
   startDate.setUTCDate(startDate.getUTCDate() - range);
@@ -30,11 +33,11 @@ router.get("/feed", async (req, res) => {
   const endDate = new Date(baseDate);
   endDate.setUTCDate(endDate.getUTCDate() + range);
 
-  let events = [];
+  let events = []; // Events to convert to iCal
+  
   const excludedBlockTitles = excludedBlocks ? excludedBlocks.split(',') : false;
   const excludedLunchDurations = excludedLunches ? excludedLunches.split(',') : false;
-
-  const includedEventCategories = (req.body.includeEvents || req.query.includeEvents) ? (req.body.includeEvents || req.query.includeEvents).toLowerCase().split(',') : false
+  const includedEventCategories = (req.body.includeEvents || req.query.includeEvents) ? (req.body.includeEvents || req.query.includeEvents).toLowerCase().split(',') : false; // Evebt categories to include, 'all' for all events
 
   try {
     await db.collection("schedules").find({
@@ -43,13 +46,15 @@ router.get("/feed", async (req, res) => {
           $lte: endDate
       }
     }).forEach(document => {
+
+      // Add bell schedule
       if (Object.hasOwn(req.query, 'includeSchedule')) {
         for (const block of document.schedule) {
           
           if (!block.name) continue;
           if (block.noICal) continue;
           if (excludedBlockTitles && excludedBlockTitles.includes(block.name)) continue; // ?exclude=ExcludedClass1,ExcludedClass2
-          if (excludedLunchDurations && block.name == "Lunch" && excludedLunchDurations.includes(String((block.end - block.start)/60000))) continue; // ?excludedLunchDurations=30,45
+          if (excludedLunchDurations && block.name == "Lunch" && excludedLunchDurations.includes(String((block.end - block.start)/MS_PER_MIN))) continue; // ?excludedLunchDurations=30,45
           // if (Object.hasOwn(req.query, 'removeShortLunch') && block.name == "Lunch" && (block.end - block.start)/60000 == 45) continue;
           // if (Object.hasOwn(req.query, 'removeShorterLunch') && block.name == "Lunch" && (block.end - block.start)/60000 == 30) continue;
 
@@ -60,7 +65,10 @@ router.get("/feed", async (req, res) => {
             title: block.name,
             url: block.link ? block.link : `https://bell.harker.org/${startArray[0]}/${startArray[1]}/${startArray[2]}`,
             location: block.location,
-            ...((block.name == "Lunch" || block.forceLunch) ? { description: document.lunch.map(item => `${item.place}: ${item.food.replace(/(?:\(GF\)|\(VEG\)|\(VEG, GF\)) /g, '').replace(/\n/g, ', ')}`).join('\n\n') } : {}),
+            ...((block.name == "Lunch" || block.forceLunch) ? {
+              // Copy lunch menu to description
+              description: document.lunch.map(item => `${item.place}: ${item.food.replace(/(?:\(GF\)|\(VEG\)|\(VEG, GF\)) /g, '').replace(/\n/g, ', ')}`).join('\n\n') 
+            } : {}),
             start: startArray,
             end: endArray
           }))
@@ -68,10 +76,10 @@ router.get("/feed", async (req, res) => {
         }
       }
 
-      if (Object.hasOwn(req.query, 'includeEvents')) {
+      // Add extra events
+      if (includedEventCategories) {
         for (const event of document.events) {
           
-          if (!includedEventCategories) continue;
           if (event.noICal) continue;
           if (!includedEventCategories.includes(event.category.toLowerCase()) && !includedEventCategories.includes('all')) continue;
 
@@ -105,7 +113,7 @@ router.get("/feed", async (req, res) => {
   
   } catch (err) {
     console.error(err);
-    return res.status(500).send(err);
+    return res.sendStatus(500);
   }
 });
 
