@@ -67,8 +67,8 @@ function calendarHandler(isDownload) {
             const startArray = getDateArrayFromISO(block.start.toISOString())
             const endArray = getDateArrayFromISO(block.end.toISOString())
 
-            const periodNumber = block.name.match(/^P(\d)$/);
-            const customPeriodName = periodNumber && customPeriodNames[periodNumber[1] - 1];
+            const periodNumber = block.name.match(/^P(\d)$/); // Check if 'Px' period
+            const customPeriodName = periodNumber && customPeriodNames && customPeriodNames[periodNumber[1] - 1] && customPeriodNames[periodNumber[1] - 1] <= 25;
 
             events.push(setDefaultData({
               title: customPeriodName ? customPeriodNames[periodNumber[1] - 1] : block.name.replaceAll(/(<br>)+/g, ',\n'),
