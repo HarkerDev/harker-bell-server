@@ -152,6 +152,64 @@ curl --request GET \
   --data year=2019
 ```
 
+## `GET` /ical/feed
+
+Gets an iCal feed for the schedule surrounding the current or requested date.
+
+#### Request Structure
+Parameters may be passed via query parameters in the URL or via JSON in the request body. When passing an array through query parameters, it should be a comma-separated string without brackets.
+
+| Key                    | Options                                                   | Purpose                                                                                                |
+|------------------------|-----------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| includeSchedule        | None                                                      | Required to include any schedule blocks                                                                |
+| includeEvents          | Array of [event category](#event-categories) IDs or `all` | Which [event categories](#event-categories) should be included                                         |
+| excludedLunchDurations | Array of Integers                                         | If `Lunch` isn't already excluded entirely, any lunch periods of specified durations will be excluded. |
+| exclude                | Array of exact period names                               | Excludes periods by exact name, case-sensitive. (e.g. `?exclude=P7,Lunch,Frosh+Mtg.`)                  |
+| periodNames            | Array of names for P1-7                                   | Custom period names for P1-7, base64 encoded if provided via query parameters                          |
+| day                    | Between 1 and 31                                          | Defaults to today's day                                                                                |
+| month                  | Between 1 and 12                                          | Defaults to today's month                                                                              |
+| year                   | Four-digit year                                           | Defaults to today's year                                                                               |
+| range                  | Integer                                                   | Number of days surrounding date to include in feed (`1 ≤ range ≤ 125`). Defaults to `90`.              |
+
+#### Response Structure
+An iCal feed containing the requested periods and events.
+
+#### Example Requests
+```cs
+https://bell.dev.harker.org/api/ical/feed?includeSchedule&includeEvents=all
+```
+
+```bash
+curl --request GET -G \
+  --url https://bell.dev.harker.org/api/ical/feed \
+  --header "Content-Type: application/x-www-form-urlencoded" \
+  --data includeSchedule \
+  --data includeEvents=all \
+  --data month=3 \
+  --data day=31 \
+  --data year=2025 \
+  --data periodNames=TmV2ZXIsZ29ubmEsZ2l2ZSx5b3UsdXAsTmV2ZXIsZ29ubmEgbGV0IHlvdSBkb3du
+```
+
+## `GET` /ical/download
+
+#### Request Structure
+Same as [/ical/feed](#get-ical-feed).
+
+#### Response Structure
+Same as [/ical/feed](#get-ical-feed), with the exception that the `Content-Type` and `Content-Disposition` headers are set to prompt a download of a .ics file.
+
+#### Example Request
+```bash
+curl --request GET -G \
+  --url https://bell.dev.harker.org/api/ical/download \
+  --header "Content-Type: application/x-www-form-urlencoded" \
+  --data includeSchedule \
+  --data month=2 \
+  --data day=10 \
+  --data year=2025
+```
+
 ## `GET` /clients
 
 Gets the number of clients currently connected to the Harker Bell websocket server.
