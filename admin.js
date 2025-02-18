@@ -120,10 +120,10 @@ router.post("/editAnnouncement", async (req, res) => {
     const auth = await ensureAuth(req.body.access_token, "editMessage");
     if (!auth) return res.status(401).send("Unauthorized access.");
     await db.collection("misc").updateOne({type: "announcement"}, {
-      $set: {message: req.body.message}
+      $set: {message: req.body.message, noBadge: req.body.noBadge || false}
     });
     const io = socket.get();
-    io.emit("update announcement", req.body.message);
+    io.emit("update announcement", req.body.message, req.body.noBadge || false);
     return res.send("Success.");
   } catch (err) {
     console.error(err);
