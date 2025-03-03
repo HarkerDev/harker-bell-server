@@ -95,6 +95,13 @@ function calendarHandler(isDownload) {
             const startArray = getDateArrayFromISO(event.start.toISOString())
             const endArray = getDateArrayFromISO(event.end.toISOString())
 
+            // Remove hours and minutes to convert into all-day event
+            const isAllDay = startArray.toString() == endArray.toString() && startArray[3] == 0 && startArray[4] == 0;
+            if (isAllDay) { 
+              startArray.splice(startArray.length - 2, 2);
+              endArray.splice(endArray.length - 2, 2);
+            }
+
             events.push(setDefaultData({
               title: event.name,
               url: event.link ? event.link : `https://bell.harker.org/${startArray[0]}/${startArray[1]}/${startArray[2]}`,
@@ -112,7 +119,7 @@ function calendarHandler(isDownload) {
 
       ics.createEvents(events, (error, value) => {
         if (error) {
-          console.error(`Error when generating ics: ${error}`)
+          console.error(`Error when generating ics:`, error)
           return res.sendStatus(500);
         }
 
