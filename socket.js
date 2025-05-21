@@ -16,6 +16,7 @@ async function connect(server) {
       "localhost:8081",
       "192.168.1.209:8080",
       "8080-d496a659-a8ae-4d14-8bd3-fccbb55169c0.ws-us02.gitpod.io:443",
+      "dev-v2-7--harker-bell.netlify.app:443"
     ]
   });
   return io;
