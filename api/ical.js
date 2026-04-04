@@ -28,7 +28,7 @@ function calendarHandler(isDownload) {
     const excludedBlocks = req.body.exclude || req.query.exclude; // Period names to exclude (e.g. Frosh+Mtg.)
     const excludedLunches = req.body.excludedLunchDurations || req.query.excludedLunchDurations; // Exclude lunch blocks by minute duration
 
-    const customPeriodNames = req.body.periodNames || (req.query.periodNames && Buffer.from(req.query.periodNames, 'base64').toString().split(',')); // Custom period names
+    const customPeriodNames = req.body.periodNames || (req.query.periodNames && Buffer.from(req.query.periodNames, 'base64').toString('utf-8').split('\n')); // Custom period names
 
     const baseDate = new Date(Date.UTC(+(year), +(month)-1, +(day)));
     const range = clamp(req.body.range || req.query.range || 90, 1, 125); // Number of days to include before and after baseDate
